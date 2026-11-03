@@ -1,0 +1,2 @@
+CREATE POLICY "cost roles upload product images" ON storage.objects FOR INSERT TO authenticated WITH CHECK (bucket_id = 'product-images' AND public.can_see_costs(auth.uid()));
+CREATE POLICY "cost roles replace product images" ON storage.objects FOR UPDATE TO authenticated USING (bucket_id = 'product-images' AND public.can_see_costs(auth.uid())) WITH CHECK (bucket_id = 'product-images' AND public.can_see_costs(auth.uid()));

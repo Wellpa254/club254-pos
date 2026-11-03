@@ -1,0 +1,406 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, monospace;
+  --font-display: "Cormorant Garamond", "Iowan Old Style", Georgia, serif;
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-surface: var(--surface);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+/* Dark is the default theme; .light opts into light mode */
+:root {
+  --radius: 0.75rem;
+  --background: oklch(0.155 0.004 270);
+  --foreground: oklch(0.95 0.005 85);
+  --surface: oklch(0.185 0.005 270);
+  --card: oklch(0.195 0.005 270);
+  --card-foreground: oklch(0.95 0.005 85);
+  --popover: oklch(0.205 0.006 270);
+  --popover-foreground: oklch(0.95 0.005 85);
+  --primary: oklch(0.8 0.115 78);
+  --primary-foreground: oklch(0.2 0.02 70);
+  --secondary: oklch(0.24 0.006 270);
+  --secondary-foreground: oklch(0.92 0.005 85);
+  --muted: oklch(0.235 0.006 270);
+  --muted-foreground: oklch(0.66 0.01 270);
+  --accent: oklch(0.255 0.008 270);
+  --accent-foreground: oklch(0.96 0.005 85);
+  --destructive: oklch(0.65 0.19 25);
+  --destructive-foreground: oklch(0.98 0 0);
+  --success: oklch(0.74 0.14 158);
+  --warning: oklch(0.8 0.14 75);
+  --border: oklch(1 0 0 / 8%);
+  --input: oklch(1 0 0 / 11%);
+  --ring: oklch(0.8 0.115 78 / 60%);
+  --chart-1: oklch(0.8 0.115 78);
+  --chart-2: oklch(0.72 0.12 200);
+  --chart-3: oklch(0.74 0.14 158);
+  --chart-4: oklch(0.65 0.19 25);
+  --chart-5: oklch(0.7 0.05 270);
+  --sidebar: oklch(0.135 0.004 270);
+  --sidebar-foreground: oklch(0.85 0.005 85);
+  --sidebar-primary: oklch(0.8 0.115 78);
+  --sidebar-primary-foreground: oklch(0.2 0.02 70);
+  --sidebar-accent: oklch(0.22 0.006 270);
+  --sidebar-accent-foreground: oklch(0.97 0.005 85);
+  --sidebar-border: oklch(1 0 0 / 7%);
+  --sidebar-ring: oklch(0.8 0.115 78 / 60%);
+
+  /* Champagne gold scale — the house accent */
+  --gold-1: oklch(0.93 0.055 92);
+  --gold-2: oklch(0.85 0.1 84);
+  --gold-3: oklch(0.74 0.118 68);
+  --gold-4: oklch(0.6 0.1 56);
+
+  --gradient-gold: linear-gradient(
+    120deg,
+    var(--gold-1) 0%,
+    var(--gold-2) 38%,
+    var(--gold-3) 68%,
+    var(--gold-2) 100%
+  );
+  --gradient-gold-sheen: linear-gradient(
+    120deg,
+    color-mix(in oklab, var(--gold-1) 22%, transparent),
+    color-mix(in oklab, var(--gold-3) 12%, transparent)
+  );
+  --gradient-surface: linear-gradient(180deg, oklch(1 0 0 / 4%), oklch(1 0 0 / 0%));
+  --gradient-hero: radial-gradient(120% 80% at 0% 0%, oklch(0.8 0.115 78 / 14%), transparent 55%),
+    radial-gradient(90% 70% at 100% 100%, oklch(0.72 0.12 200 / 10%), transparent 60%);
+  --hairline-gold: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, var(--gold-2) 60%, transparent),
+    transparent
+  );
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  --shadow-card: 0 1px 0 0 oklch(1 0 0 / 4%) inset, 0 12px 32px -16px oklch(0 0 0 / 60%);
+  --shadow-gold: 0 10px 30px -12px oklch(0.8 0.115 78 / 45%);
+  --shadow-luxe: 0 1px 0 0 oklch(1 0 0 / 6%) inset, 0 44px 90px -50px oklch(0 0 0 / 90%),
+    0 14px 34px -22px oklch(0 0 0 / 75%);
+}
+
+.light {
+  --background: oklch(0.985 0.003 85);
+  --foreground: oklch(0.2 0.01 270);
+  --surface: oklch(0.97 0.004 85);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.2 0.01 270);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.2 0.01 270);
+  --primary: oklch(0.62 0.12 70);
+  --primary-foreground: oklch(0.99 0 0);
+  --secondary: oklch(0.955 0.004 85);
+  --secondary-foreground: oklch(0.25 0.01 270);
+  --muted: oklch(0.955 0.004 85);
+  --muted-foreground: oklch(0.5 0.01 270);
+  --accent: oklch(0.94 0.006 85);
+  --accent-foreground: oklch(0.2 0.01 270);
+  --border: oklch(0 0 0 / 8%);
+  --input: oklch(0 0 0 / 12%);
+  --sidebar: oklch(0.97 0.004 85);
+  --sidebar-foreground: oklch(0.3 0.01 270);
+  --sidebar-accent: oklch(0.93 0.006 85);
+  --sidebar-accent-foreground: oklch(0.2 0.01 270);
+  --sidebar-border: oklch(0 0 0 / 7%);
+  --gold-1: oklch(0.74 0.1 84);
+  --gold-2: oklch(0.66 0.12 76);
+  --gold-3: oklch(0.56 0.11 62);
+  --gold-4: oklch(0.46 0.09 52);
+  --shadow-card: 0 1px 2px oklch(0 0 0 / 5%), 0 8px 24px -16px oklch(0 0 0 / 18%);
+  --shadow-luxe: 0 1px 2px oklch(0 0 0 / 6%), 0 30px 60px -40px oklch(0 0 0 / 30%);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+  html {
+    color-scheme: dark;
+    scroll-behavior: smooth;
+  }
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection {
+    background-color: color-mix(in oklab, var(--gold-2) 35%, transparent);
+    color: var(--foreground);
+  }
+}
+
+@utility surface-card {
+  background: var(--gradient-surface), var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+}
+@utility bg-hero {
+  background-image: var(--gradient-hero);
+}
+@utility bg-gold {
+  background-image: var(--gradient-gold);
+}
+@utility shadow-gold {
+  box-shadow: var(--shadow-gold);
+}
+@utility text-gold {
+  background-image: var(--gradient-gold);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+@utility tabular {
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: "tnum";
+}
+@utility eyebrow {
+  font-size: 0.6875rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: var(--muted-foreground);
+}
+@utility eyebrow-gold {
+  font-size: 0.7rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: color-mix(in oklab, var(--gold-2) 88%, var(--foreground));
+}
+@utility display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: -0.015em;
+  line-height: 0.98;
+}
+@utility rule-gold {
+  height: 1px;
+  background-image: var(--hairline-gold);
+}
+@utility rule-gold-left {
+  height: 1px;
+  background-image: linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--gold-2) 75%, transparent),
+    color-mix(in oklab, var(--gold-3) 18%, transparent) 70%,
+    transparent
+  );
+}
+@utility grain-layer {
+  background-image: var(--grain);
+  opacity: 0.16;
+  mix-blend-mode: overlay;
+}
+@utility hero-veil {
+  background-image:
+    linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--background) 46%, transparent) 0%,
+      color-mix(in oklab, var(--background) 20%, transparent) 45%,
+      var(--background) 100%
+    ),
+    linear-gradient(
+      90deg,
+      color-mix(in oklab, var(--background) 76%, transparent) 0%,
+      color-mix(in oklab, var(--background) 44%, transparent) 48%,
+      color-mix(in oklab, var(--background) 4%, transparent) 100%
+    );
+}
+@utility hero-veil-m {
+  background-image:
+    linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--background) 74%, transparent) 0%,
+      color-mix(in oklab, var(--background) 60%, transparent) 55%,
+      var(--background) 100%
+    ),
+    linear-gradient(
+      90deg,
+      color-mix(in oklab, var(--background) 46%, transparent) 0%,
+      color-mix(in oklab, var(--background) 12%, transparent) 100%
+    );
+}
+@utility veil-left {
+  background-image: linear-gradient(
+    90deg,
+    var(--background) 0%,
+    color-mix(in oklab, var(--background) 82%, transparent) 45%,
+    color-mix(in oklab, var(--background) 18%, transparent) 100%
+  );
+}
+@utility card-luxe {
+  background: var(--gradient-gold-sheen), var(--gradient-surface), var(--card);
+  border: 1px solid color-mix(in oklab, var(--gold-2) 16%, var(--border));
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-luxe);
+}
+@utility frame-gold {
+  position: relative;
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 12px;
+    border: 1px solid color-mix(in oklab, var(--gold-2) 22%, transparent);
+    border-radius: calc(var(--radius-2xl) - 6px);
+    pointer-events: none;
+  }
+}
+@utility lift {
+  transition:
+    transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1),
+    border-color 0.5s ease,
+    box-shadow 0.5s ease;
+  &:hover {
+    transform: translateY(-4px);
+    border-color: color-mix(in oklab, var(--gold-2) 38%, var(--border));
+    box-shadow: var(--shadow-luxe), var(--shadow-gold);
+  }
+}
+@utility sheen {
+  position: relative;
+  overflow: hidden;
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: linear-gradient(
+      115deg,
+      transparent 32%,
+      color-mix(in oklab, var(--gold-1) 16%, transparent) 46%,
+      transparent 60%
+    );
+    transform: translateX(-110%);
+    transition: transform 1.2s cubic-bezier(0.2, 0.7, 0.2, 1);
+    pointer-events: none;
+  }
+  &:hover::after {
+    transform: translateX(110%);
+  }
+}
+@utility drift {
+  animation: drift 11s ease-in-out infinite;
+}
+@utility shimmer-rule {
+  background-size: 220% 100%;
+  animation: shimmer-rule 7s ease-in-out infinite;
+}
+@utility fade-up {
+  animation: fade-up 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+@utility veil-center {
+  background-image: radial-gradient(
+    60% 46% at 50% 52%,
+    color-mix(in oklab, var(--background) 70%, transparent) 0%,
+    color-mix(in oklab, var(--background) 32%, transparent) 55%,
+    transparent 82%
+  );
+}
+@utility hero-frame {
+  position: absolute;
+  pointer-events: none;
+  border: 1px solid color-mix(in oklab, var(--gold-2) 18%, transparent);
+}
+@utility hero-corner {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border-color: color-mix(in oklab, var(--gold-1) 60%, transparent);
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -12px, 0);
+  }
+}
+@keyframes shimmer-rule {
+  0%,
+  100% {
+    background-position: 0% 0;
+  }
+  50% {
+    background-position: 100% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: white;
+    color: black;
+  }
+}
