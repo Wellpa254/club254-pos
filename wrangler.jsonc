@@ -1,0 +1,7 @@
+{
+  // Must match the Worker name in the Cloudflare dashboard. Nitro merges this into the
+  // generated .output/server/wrangler.json (it adds main, assets and compatibility flags itself).
+  "name": "club-pos",
+  // Never delete variables set in the dashboard when deploying from this config.
+  "keep_vars": true
+}
