@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Plus, PackagePlus, SlidersHorizontal, Search, Boxes, Trash2, ImagePlus } from "lucide-react";
+import { Plus, PackagePlus, SlidersHorizontal, Search, Boxes, Trash2, ImagePlus, Pencil } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell, EmptyState, StatCard } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,8 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Switch } from "@/components/ui/switch";
+import { isWaitingForPrice, productEditProblem } from "@/lib/product-edit";
 import { ksh, fmtDateTime, friendlyError } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -20,7 +22,7 @@ export const Route = createFileRoute("/_authenticated/inventory")({
   component: InventoryPage,
 });
 
-type Row = { id: string; name: string; sku: string; brand: string | null; category_id: string | null; selling_price: number; stock_qty: number; low_stock_threshold: number; unit: string; active: boolean; avg_cost: number };
+type Row = { id: string; name: string; sku: string; barcode?: string | null; brand: string | null; category_id: string | null; selling_price: number; stock_qty: number; low_stock_threshold: number; unit: string; active: boolean; avg_cost: number };
 
 function useInventory() {
   return useQuery({
@@ -51,18 +53,27 @@ function InventoryPage() {
   const [adjust, setAdjust] = useState<Row | null>(null);
   const [del, setDel] = useState<Row | null>(null);
   const [adding, setAdding] = useState(false);
+  const [edit, setEdit] = useState<Row | null>(null);
+  const [view, setView] = useState<"active" | "inactive" | "all">("active");
   const rows = inv.data?.rows ?? [];
   const stocked = rows.filter((r) => r.unit !== "serving");
+  const stockedActive = stocked.filter((r) => r.active);
   const value = stocked.reduce((s, r) => s + Math.max(0, Number(r.stock_qty)) * r.avg_cost, 0);
-  const low = stocked.filter((r) => Number(r.stock_qty) > 0 && Number(r.stock_qty) <= Number(r.low_stock_threshold));
-  const out = stocked.filter((r) => Number(r.stock_qty) <= 0);
-  const shown = useMemo(() => rows.filter((r) => !q || r.name.toLowerCase().includes(q.toLowerCase()) || r.sku.toLowerCase().includes(q.toLowerCase())), [rows, q]);
+  const low = stockedActive.filter((r) => Number(r.stock_qty) > 0 && Number(r.stock_qty) <= Number(r.low_stock_threshold));
+  const out = stockedActive.filter((r) => Number(r.stock_qty) <= 0);
+  const activeCount = rows.filter((r) => r.active).length;
+  const inactiveCount = rows.length - activeCount;
+  const waiting = rows.filter(isWaitingForPrice).length;
+  const shown = useMemo(
+    () => rows.filter((r) => (view === "all" || (view === "active") === r.active) && (!q || r.name.toLowerCase().includes(q.toLowerCase()) || r.sku.toLowerCase().includes(q.toLowerCase()))),
+    [rows, q, view],
+  );
 
   return (
     <AppShell area="inventory" title="Inventory" actions={<Button size="sm" variant="gold" onClick={() => setAdding(true)}><Plus />Add product</Button>}>
       <div className="space-y-6">
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-          <StatCard label="Products" value={rows.length} hint={`${stocked.reduce((s, r) => s + Math.max(0, Number(r.stock_qty)), 0)} units on hand`} />
+          <StatCard label="Products" value={activeCount} hint={`${stocked.reduce((s, r) => s + Math.max(0, Number(r.stock_qty)), 0)} units on hand${inactiveCount ? ` · ${inactiveCount} inactive` : ""}`} />
           <StatCard label="Inventory value" value={ksh(value)} hint="Weighted-average cost" />
           <StatCard label="Low stock" value={low.length} tone={low.length ? "warn" : undefined} hint={low.slice(0, 2).map((r) => r.name).join(", ") || "All good"} />
           <StatCard label="Out of stock" value={out.length} tone={out.length ? "bad" : undefined} />
@@ -71,10 +82,22 @@ function InventoryPage() {
         <Tabs defaultValue="stock">
           <TabsList><TabsTrigger value="stock">Stock</TabsTrigger><TabsTrigger value="moves">Movements</TabsTrigger></TabsList>
           <TabsContent value="stock" className="mt-4 space-y-3">
-            <div className="relative max-w-sm">
-              <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-              <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search products" className="pl-9" />
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="relative w-full max-w-sm">
+                <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search products" className="pl-9" />
+              </div>
+              <div className="flex gap-1" role="group" aria-label="Show products">
+                {([["active", "Active"], ["inactive", "Inactive"], ["all", "All"]] as const).map(([v, label]) => (
+                  <Button key={v} size="sm" variant={view === v ? "secondary" : "ghost"} aria-pressed={view === v} onClick={() => setView(v)}>{label}</Button>
+                ))}
+              </div>
             </div>
+            {waiting > 0 && view !== "inactive" && (
+              <button type="button" onClick={() => setView("inactive")} className="w-full rounded-lg border border-warning/30 bg-warning/10 p-3 text-left text-sm text-warning hover:bg-warning/15">
+                {waiting} {waiting === 1 ? "product is" : "products are"} waiting for a price. Tap to review, then use the pencil to set a price and switch it on.
+              </button>
+            )}
             <div className="surface-card overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="text-left text-xs text-muted-foreground">
@@ -87,7 +110,7 @@ function InventoryPage() {
                     return (
                       <tr key={r.id} className="border-b last:border-0 hover:bg-accent/30">
                         <td className="p-3"><div className="font-medium">{r.name}</div><div className="text-xs text-muted-foreground">{r.sku} · {inv.data?.cats.find((c) => c.id === r.category_id)?.name}</div></td>
-                        <td className="p-3"><Badge className={s.c}>{s.l}</Badge></td>
+                        <td className="p-3">{r.active ? <Badge className={s.c}>{s.l}</Badge> : <Badge className="bg-muted text-muted-foreground">Inactive</Badge>}</td>
                         <td className="p-3 text-right tabular">{Number(r.stock_qty)} <span className="text-xs text-muted-foreground">/ min {Number(r.low_stock_threshold)}</span></td>
                         <td className="p-3 text-right tabular">{ksh(r.avg_cost)}</td>
                         <td className="p-3 text-right tabular">{ksh(r.selling_price)}</td>
@@ -95,6 +118,7 @@ function InventoryPage() {
                         <td className="p-3 text-right whitespace-nowrap">
                           <PhotoButton row={r} />
                           <Button size="sm" variant="ghost" onClick={() => setReceive(r)}><PackagePlus />Receive</Button>
+                          <Button size="sm" variant="ghost" onClick={() => setEdit(r)} aria-label="Edit product" title="Edit product"><Pencil /></Button>
                           <Button size="sm" variant="ghost" onClick={() => setAdjust(r)} aria-label="Adjust"><SlidersHorizontal /></Button>
                           <Button size="sm" variant="ghost" onClick={() => setDel(r)} aria-label="Delete" className="text-destructive hover:text-destructive"><Trash2 /></Button>
                         </td>
@@ -103,7 +127,7 @@ function InventoryPage() {
                   })}
                 </tbody>
               </table>
-              {!inv.isLoading && shown.length === 0 && <EmptyState icon={Boxes} title="No products" body="Add your first product to start tracking stock." />}
+              {!inv.isLoading && shown.length === 0 && <EmptyState icon={Boxes} title="No products" body={rows.length ? "Nothing matches this view. Try another tab or search." : "Add your first product to start tracking stock."} />}
             </div>
           </TabsContent>
           <TabsContent value="moves" className="mt-4"><Movements rows={rows} /></TabsContent>
@@ -113,6 +137,7 @@ function InventoryPage() {
       {adjust && <AdjustDialog row={adjust} onClose={() => setAdjust(null)} />}
       {del && <DeleteDialog row={del} onClose={() => setDel(null)} />}
       {adding && <AddProductDialog cats={inv.data?.cats ?? []} onClose={() => setAdding(false)} />}
+      {edit && <EditProductDialog row={edit} cats={inv.data?.cats ?? []} onClose={() => setEdit(null)} />}
     </AppShell>
   );
 }
@@ -297,6 +322,65 @@ function DeleteDialog({ row, onClose }: { row: Row; onClose: () => void }) {
             </DialogFooter>
           </div>
         )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function EditProductDialog({ row, cats, onClose }: { row: Row; cats: { id: string; name: string }[]; onClose: () => void }) {
+  const [f, setF] = useState({
+    name: row.name, sku: row.sku, barcode: row.barcode ?? "", brand: row.brand ?? "", category_id: row.category_id ?? "",
+    selling_price: String(Number(row.selling_price)), low_stock_threshold: String(Number(row.low_stock_threshold)), active: row.active,
+  });
+  const done = useDone(onClose, "Product updated");
+  const problem = productEditProblem(f);
+  const m = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.from("products").update({
+        name: f.name.trim(), sku: f.sku.trim().toUpperCase(), barcode: f.barcode.trim() || null, brand: f.brand.trim() || null,
+        category_id: f.category_id || null, selling_price: Number(f.selling_price), low_stock_threshold: Number(f.low_stock_threshold), active: f.active,
+      }).eq("id", row.id).select("id");
+      if (error) throw error;
+      if (!data?.length) throw new Error("NO_ACCESS");
+    },
+    onSuccess: done,
+    onError: (e) => {
+      const msg = (e as { message?: string }).message ?? "";
+      toast.error(msg === "NO_ACCESS" ? "You don't have permission to edit products." : msg.includes("duplicate") ? "That SKU or barcode is already used." : friendlyError(e));
+    },
+  });
+  const set = (k: "name" | "sku" | "barcode" | "brand" | "low_stock_threshold") => (e: React.ChangeEvent<HTMLInputElement>) => setF({ ...f, [k]: e.target.value });
+  // Typing the first price on a product that was waiting for one switches it on, which is almost always the intent.
+  const setPrice = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const v = e.target.value;
+    setF({ ...f, selling_price: v, active: isWaitingForPrice(row) && Number(v) > 0 ? true : f.active });
+  };
+  return (
+    <Dialog open onOpenChange={(o) => !o && onClose()}>
+      <DialogContent>
+        <DialogHeader><DialogTitle>Edit product</DialogTitle></DialogHeader>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="col-span-2 space-y-1.5"><Label>Name</Label><Input value={f.name} onChange={set("name")} /></div>
+          <div className="space-y-1.5"><Label>SKU</Label><Input value={f.sku} onChange={set("sku")} /></div>
+          <div className="space-y-1.5"><Label>Barcode</Label><Input value={f.barcode} onChange={set("barcode")} /></div>
+          <div className="space-y-1.5"><Label>Category</Label>
+            <Select value={f.category_id} onValueChange={(v) => setF({ ...f, category_id: v })}><SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>{cats.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent></Select>
+          </div>
+          <div className="space-y-1.5"><Label>Brand</Label><Input value={f.brand} onChange={set("brand")} /></div>
+          <div className="space-y-1.5"><Label>Selling price (KSh)</Label><Input inputMode="decimal" value={f.selling_price} onChange={setPrice} /></div>
+          <div className="space-y-1.5"><Label>Low-stock alert at</Label><Input inputMode="decimal" value={f.low_stock_threshold} onChange={set("low_stock_threshold")} /></div>
+          <div className="col-span-2 flex items-center justify-between gap-3 rounded-lg bg-secondary p-3">
+            <div>
+              <div className="text-sm font-medium">Sold at the till</div>
+              <div className="text-xs text-muted-foreground">Turn off to hide it from the till. Its history is kept.</div>
+            </div>
+            <Switch checked={f.active} onCheckedChange={(v) => setF({ ...f, active: v })} aria-label="Sold at the till" />
+          </div>
+        </div>
+        <p className="text-xs text-muted-foreground">To change stock or buying cost, use Receive or Adjust. Price changes are recorded in the audit log.</p>
+        {problem && <p className="text-xs text-warning">{problem}</p>}
+        <DialogFooter><Button variant="gold" disabled={!!problem || m.isPending} onClick={() => m.mutate()}>Save changes</Button></DialogFooter>
       </DialogContent>
     </Dialog>
   );
