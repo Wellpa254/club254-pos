@@ -1,8 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Search, Minus, Plus, Trash2, Banknote, Smartphone, CreditCard, CircleEllipsis, CheckCircle2, Printer, Loader2, ShoppingCart, ScanBarcode, Beer, Wine, GlassWater, Zap, Martini, Droplets, Package } from "lucide-react";
+import { Search, Minus, Plus, Trash2, Banknote, Smartphone, CreditCard, CircleEllipsis, CheckCircle2, Printer, Loader2, ShoppingCart, ScanBarcode, Beer, Wine, GlassWater, Zap, Martini, Droplets, Package, Clock, Utensils } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { queueSale, isNetworkError, cached } from "@/lib/offline-sales";
 import { AppShell, EmptyState } from "@/components/app-shell";
@@ -24,7 +24,18 @@ type Product = { id: string; name: string; sku: string; barcode: string | null; 
 type Line = { product: Product; qty: number };
 type Pay = "cash" | "mpesa" | "card" | "other";
 
-const CAT_ICON: Record<string, typeof Beer> = { Beer, Spirits: Martini, Wine, "Soft Drinks": GlassWater, "Energy Drinks": Zap, Water: Droplets, Cocktails: Martini };
+const CAT_ICON: Record<string, typeof Beer> = { Beer, Spirits: Martini, Wine, "Soft Drinks": GlassWater, "Energy Drinks": Zap, Water: Droplets, Cocktails: Martini, "Food items": Utensils };
+const CAT_TINT: Record<string, { chip: string; icon: string }> = {
+  Beer: { chip: "from-amber-400/25 to-amber-600/10", icon: "text-amber-500" },
+  Spirits: { chip: "from-violet-400/25 to-violet-600/10", icon: "text-violet-400" },
+  Wine: { chip: "from-rose-400/25 to-rose-600/10", icon: "text-rose-400" },
+  "Soft Drinks": { chip: "from-sky-400/25 to-sky-600/10", icon: "text-sky-400" },
+  "Energy Drinks": { chip: "from-lime-400/25 to-lime-600/10", icon: "text-lime-500" },
+  Water: { chip: "from-cyan-400/25 to-cyan-600/10", icon: "text-cyan-400" },
+  Cocktails: { chip: "from-fuchsia-400/25 to-fuchsia-600/10", icon: "text-fuchsia-400" },
+  "Food items": { chip: "from-orange-400/25 to-orange-600/10", icon: "text-orange-400" },
+};
+const NEUTRAL_TINT = { chip: "from-zinc-400/20 to-zinc-600/10", icon: "text-muted-foreground" };
 const PAY: { k: Pay; l: string; i: typeof Banknote }[] = [
   { k: "cash", l: "Cash", i: Banknote }, { k: "mpesa", l: "M-Pesa", i: Smartphone },
   { k: "card", l: "Card", i: CreditCard }, { k: "other", l: "Other", i: CircleEllipsis },
@@ -36,12 +47,12 @@ function PosPage() {
   return (
     <AppShell area="pos" title="Point of Sale" bare
       actions={shift.data && <Link to="/shifts" className="hidden text-xs text-muted-foreground sm:block">Shift open since {fmtTime(shift.data.opened_at)}</Link>}>
-      {shift.isLoading ? null : shift.data ? <Register shiftId={shift.data.id} cashierName={me?.fullName ?? ""} /> : <StartShift />}
+      {shift.isLoading ? null : shift.data ? <Register shiftId={shift.data.id} openedAt={shift.data.opened_at} cashierName={me?.fullName ?? ""} /> : <StartShift />}
     </AppShell>
   );
 }
 
-function Register({ shiftId, cashierName }: { shiftId: string; cashierName: string }) {
+function Register({ shiftId, openedAt, cashierName }: { shiftId: string; openedAt: string; cashierName: string }) {
   const qc = useQueryClient();
   const [cat, setCat] = useState<string | "all">("all");
   const [q, setQ] = useState("");
@@ -122,48 +133,71 @@ function Register({ shiftId, cashierName }: { shiftId: string; cashierName: stri
     onError: (e) => { toast.error(friendlyError(e, "Unable to complete sale. Please try again.")); qc.invalidateQueries({ queryKey: ["pos-products"] }); },
   });
 
+  const itemCount = cart.reduce((s, l) => s + l.qty, 0);
+  const counts = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const p of products.data ?? []) if (p.category_id) m.set(p.category_id, (m.get(p.category_id) ?? 0) + 1);
+    return m;
+  }, [products.data]);
+  const shownCats = (cats.data ?? []).filter((c) => (counts.get(c.id) ?? 0) > 0);
+  // Closing the sheet when the order empties keeps the phone view from showing a big blank panel.
+  useEffect(() => { if (cart.length === 0) setMobileCart(false); }, [cart.length]);
+  const buzz = () => { try { navigator.vibrate?.(8); } catch { /* not supported */ } };
+  const searchBox = (cls: string, placeholder: string) => (
+    <div className="relative flex-1">
+      <Search className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+      <Input value={q} onChange={(e) => setQ(e.target.value)} onKeyDown={onSearchKey} placeholder={placeholder} enterKeyHint="search" className={cn("pl-10 pr-10", cls)} />
+      <ScanBarcode className="absolute right-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+    </div>
+  );
+
   const cartPanel = (
-    <div className="flex h-full flex-col">
-      <div className="flex items-center justify-between px-5 pt-5">
-        <div className="font-semibold">Current order</div>
+    <div className="flex h-full max-h-[90dvh] flex-col lg:max-h-none">
+      <div className="mx-auto mt-2 h-1 w-10 shrink-0 rounded-full bg-muted-foreground/30 lg:hidden" />
+      <div className="flex items-center justify-between gap-2 px-5 pb-1 pr-14 pt-3 lg:pr-5 lg:pt-5">
+        <div className="flex items-center gap-2">
+          <span className="font-semibold">Current order</span>
+          {itemCount > 0 && <span className="rounded-full bg-primary/15 px-2 py-0.5 text-xs font-semibold text-primary tabular">{itemCount}</span>}
+        </div>
         {cart.length > 0 && <Button variant="ghost" size="sm" onClick={() => setCart([])}>Clear</Button>}
       </div>
-      <div className="flex-1 overflow-y-auto px-3 py-3">
+      <div className="min-h-0 flex-1 overflow-y-auto px-3 py-2">
         {cart.length === 0 ? (
           <EmptyState icon={ShoppingCart} title="No items yet" body="Tap a product to add it to the order." />
         ) : cart.map((l) => (
-          <div key={l.product.id} className="flex items-center gap-3 rounded-lg px-2 py-2.5 hover:bg-accent/50">
+          <div key={l.product.id} className="flex items-center gap-3 rounded-xl px-2 py-2.5">
             <div className="min-w-0 flex-1">
-              <div className="truncate text-sm font-medium">{l.product.name}</div>
-              <div className="text-xs text-muted-foreground tabular">{ksh(l.product.selling_price)} each</div>
+              <div className="line-clamp-2 text-sm font-medium leading-tight">{l.product.name}</div>
+              <div className="mt-0.5 text-xs text-muted-foreground tabular">{ksh(l.product.selling_price)} each</div>
             </div>
-            <div className="flex items-center rounded-lg border">
-              <button className="grid size-8 place-items-center" onClick={() => setQty(l.product.id, l.qty - 1)} aria-label="Decrease"><Minus className="size-3.5" /></button>
-              <span className="w-7 text-center text-sm tabular">{l.qty}</span>
-              <button className="grid size-8 place-items-center" onClick={() => setQty(l.product.id, l.qty + 1)} aria-label="Increase"><Plus className="size-3.5" /></button>
+            <div className="flex items-center rounded-xl border bg-secondary/40">
+              <button className={cn("grid size-9 place-items-center rounded-l-xl transition active:scale-90", l.qty === 1 ? "text-destructive" : "")} onClick={() => setQty(l.product.id, l.qty - 1)} aria-label={l.qty === 1 ? "Remove" : "Decrease"}>
+                {l.qty === 1 ? <Trash2 className="size-4" /> : <Minus className="size-4" />}
+              </button>
+              <span className="w-7 text-center text-sm font-semibold tabular">{l.qty}</span>
+              <button className="grid size-9 place-items-center rounded-r-xl transition active:scale-90" onClick={() => setQty(l.product.id, l.qty + 1)} aria-label="Increase"><Plus className="size-4" /></button>
             </div>
-            <div className="w-20 text-right text-sm font-medium tabular">{ksh(l.qty * Number(l.product.selling_price))}</div>
-            <button onClick={() => setQty(l.product.id, 0)} className="text-muted-foreground hover:text-destructive" aria-label="Remove"><Trash2 className="size-4" /></button>
+            <div className="min-w-[4.75rem] shrink-0 whitespace-nowrap text-right text-sm font-semibold tabular">{ksh(l.qty * Number(l.product.selling_price))}</div>
           </div>
         ))}
       </div>
-      <div className="space-y-3 border-t p-5">
+      <div className="space-y-3 border-t bg-surface/60 p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
         <div className="flex justify-between text-sm"><span className="text-muted-foreground">Subtotal</span><span className="tabular">{ksh(subtotal)}</span></div>
         <div className="flex items-center justify-between gap-3 text-sm">
           <span className="text-muted-foreground">Discount</span>
-          <Input inputMode="numeric" value={discount} onChange={(e) => setDiscount(e.target.value.replace(/[^\d]/g, ""))} placeholder="0" className="h-8 w-28 text-right tabular" />
+          <Input inputMode="numeric" value={discount} onChange={(e) => setDiscount(e.target.value.replace(/[^\d]/g, ""))} placeholder="0" className="h-9 w-28 rounded-lg text-right tabular" />
         </div>
-        <div className="flex items-baseline justify-between pt-1"><span className="font-medium">Total</span><span className="text-2xl font-semibold tabular">{ksh(total)}</span></div>
-        <div className="grid grid-cols-4 gap-1.5">
+        <div className="flex items-baseline justify-between pt-1"><span className="font-medium">Total</span><span className="text-3xl font-semibold tracking-tight tabular">{ksh(total)}</span></div>
+        <div className="grid grid-cols-4 gap-2" role="radiogroup" aria-label="Payment method">
           {PAY.map((p) => (
-            <button key={p.k} onClick={() => setPay(p.k)}
-              className={cn("flex flex-col items-center gap-1 rounded-lg border py-2 text-[11px] transition-colors",
-                pay === p.k ? "border-primary bg-primary/10 text-primary" : "text-muted-foreground hover:bg-accent")}>
-              <p.i className="size-4" />{p.l}
+            <button key={p.k} role="radio" aria-checked={pay === p.k} onClick={() => setPay(p.k)}
+              className={cn("flex h-16 flex-col items-center justify-center gap-1.5 rounded-xl border text-xs font-medium transition active:scale-95",
+                pay === p.k ? "border-primary bg-primary/10 text-primary ring-1 ring-primary/30" : "bg-card/60 text-muted-foreground hover:bg-accent")}>
+              <p.i className="size-[18px]" />{p.l}
             </button>
           ))}
         </div>
-        <Button variant="gold" size="xl" className="w-full" disabled={!cart.length || checkout.isPending} onClick={() => checkout.mutate()}>
+        <Button variant="gold" size="xl" className="h-14 w-full rounded-2xl text-base" disabled={!cart.length || checkout.isPending} onClick={() => checkout.mutate()}>
           {checkout.isPending ? <Loader2 className="animate-spin" /> : null}Charge {ksh(total)}
         </Button>
       </div>
@@ -172,57 +206,56 @@ function Register({ shiftId, cashierName }: { shiftId: string; cashierName: stri
 
   return (
     <div className="lg:grid lg:h-[calc(100vh-3.5rem)] lg:grid-cols-[180px_1fr_380px]">
-      {/* categories */}
-      <div className="flex gap-1.5 overflow-x-auto border-b px-4 py-3 lg:flex-col lg:overflow-y-auto lg:border-b-0 lg:border-r lg:px-3 lg:py-5">
+      {/* categories: side rail on desktop */}
+      <div className="hidden gap-1.5 overflow-y-auto border-r px-3 py-5 lg:flex lg:flex-col">
         <CatBtn active={cat === "all"} onClick={() => setCat("all")} icon={Package} label="All" />
-        {cats.data?.map((c) => <CatBtn key={c.id} active={cat === c.id} onClick={() => setCat(c.id)} icon={CAT_ICON[c.name] ?? Package} label={c.name} />)}
+        {shownCats.map((c) => <CatBtn key={c.id} active={cat === c.id} onClick={() => setCat(c.id)} icon={CAT_ICON[c.name] ?? Package} label={c.name} />)}
       </div>
+
+      {/* search, shift and categories: pinned under the header on phones */}
+      <div className="sticky top-14 z-20 border-b bg-background/90 backdrop-blur-md lg:hidden">
+        <div className="flex items-center gap-2 px-3 pt-3">
+          {searchBox("h-11 rounded-xl", "Search or scan")}
+          <Link to="/shifts" className="flex h-11 shrink-0 items-center gap-1.5 rounded-xl border bg-card px-3 text-xs font-medium tabular active:scale-95 sm:hidden" aria-label={`Shift open since ${fmtTime(openedAt)}. Tap to manage the shift.`}>
+            <Clock className="size-3.5 text-primary" /><span className="text-muted-foreground">Shift</span>{fmtTime(openedAt)}
+          </Link>
+        </div>
+        <div className="flex gap-2 overflow-x-auto px-3 py-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <CatChip active={cat === "all"} onClick={() => setCat("all")} icon={Package} label="All" count={products.data?.length} />
+          {shownCats.map((c) => <CatChip key={c.id} active={cat === c.id} onClick={() => setCat(c.id)} icon={CAT_ICON[c.name] ?? Package} label={c.name} count={counts.get(c.id)} />)}
+        </div>
+      </div>
+
       {/* grid */}
-      <div className="min-w-0 overflow-y-auto px-4 py-4 lg:px-6 lg:py-5">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input value={q} onChange={(e) => setQ(e.target.value)} onKeyDown={onSearchKey} placeholder="Search, or scan a barcode and press Enter" className="h-11 pl-9 pr-10" />
-          <ScanBarcode className="absolute right-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+      <div className={cn("min-w-0 px-3 pt-3 lg:overflow-y-auto lg:px-6 lg:py-5", cart.length > 0 ? "pb-28" : "pb-6", "lg:pb-5")}>
+        <div className="hidden lg:flex">{searchBox("h-11 rounded-xl", "Search, or scan a barcode and press Enter")}</div>
+        <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3 lg:mt-4 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+          {visible.map((p) => (
+            <ProductTile key={p.id} p={p} catName={catName(p.category_id)} inCart={cart.find((l) => l.product.id === p.id)?.qty} onAdd={() => { buzz(); add(p); }} />
+          ))}
         </div>
-        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4">
-          {visible.map((p) => {
-            const out = Number(p.stock_qty) <= 0;
-            const low = !out && Number(p.stock_qty) <= Number(p.low_stock_threshold);
-            const Icon = CAT_ICON[catName(p.category_id)] ?? Package;
-            const inCart = cart.find((l) => l.product.id === p.id)?.qty;
-            return (
-              <button key={p.id} disabled={out} onClick={() => add(p)}
-                className={cn("surface-card group relative flex flex-col p-3 text-left transition-all hover:-translate-y-0.5 hover:border-primary/40 active:scale-[0.98] disabled:opacity-40 disabled:hover:translate-y-0",
-                  inCart && "border-primary/60")}>
-                <div className="grid aspect-[4/3] place-items-center rounded-lg bg-secondary">
-                  {p.image_url ? <img src={p.image_url} alt="" className="size-full rounded-lg object-cover" loading="lazy" /> : <Icon className="size-8 text-muted-foreground/60" />}
-                </div>
-                <div className="mt-3 line-clamp-2 min-h-[2.5rem] text-sm font-medium leading-tight">{p.name}</div>
-                <div className="mt-1 flex items-center justify-between">
-                  <span className="font-semibold tabular">{ksh(p.selling_price)}</span>
-                  <span className={cn("text-[11px]", out ? "text-destructive" : low ? "text-warning" : "text-muted-foreground")}>
-                    {out ? "Out" : low ? `${Number(p.stock_qty)} left` : "In stock"}
-                  </span>
-                </div>
-                {inCart && <span className="absolute right-2 top-2 grid size-6 place-items-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">{inCart}</span>}
-              </button>
-            );
-          })}
-        </div>
+        {products.isLoading && <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">{Array.from({ length: 6 }).map((_, i) => <div key={i} className="h-36 animate-pulse rounded-2xl bg-secondary/50" />)}</div>}
         {!products.isLoading && visible.length === 0 && <EmptyState icon={Search} title="No matching products" body="Try another search or category." />}
       </div>
       {/* cart desktop */}
       <div className="hidden border-l bg-surface lg:block">{cartPanel}</div>
 
-      {/* mobile sticky checkout */}
-      <div className="fixed inset-x-0 bottom-[calc(3.75rem+env(safe-area-inset-bottom))] z-30 px-4 pb-3 lg:hidden">
-        <Button variant="gold" size="xl" className="w-full justify-between" onClick={() => setMobileCart(true)}>
-          <span className="flex items-center gap-2"><ShoppingCart />{cart.reduce((s, l) => s + l.qty, 0)} items</span>
-          <span className="tabular">{ksh(total)}</span>
-        </Button>
-      </div>
+      {/* mobile checkout bar: only when there is something to charge */}
+      {cart.length > 0 && (
+        <div className="fixed inset-x-0 bottom-[calc(3.75rem+env(safe-area-inset-bottom))] z-30 px-3 pb-3 animate-in fade-in slide-in-from-bottom-3 duration-200 lg:hidden">
+          <Button variant="gold" size="xl" className="h-14 w-full justify-between rounded-2xl" onClick={() => setMobileCart(true)}>
+            <span className="flex items-center gap-3">
+              <span className="relative grid size-9 place-items-center rounded-full bg-black/15"><ShoppingCart className="size-[18px]" />
+                <span className="absolute -right-1 -top-1 grid min-w-5 place-items-center rounded-full bg-black px-1 text-[11px] font-bold leading-5 text-white tabular">{itemCount}</span>
+              </span>
+              <span className="text-[15px]">View order</span>
+            </span>
+            <span className="text-base tabular">{ksh(total)}</span>
+          </Button>
+        </div>
+      )}
       <Sheet open={mobileCart} onOpenChange={setMobileCart}>
-        <SheetContent side="bottom" className="h-[88vh] rounded-t-2xl p-0">
+        <SheetContent side="bottom" className="max-h-[92dvh] gap-0 rounded-t-3xl p-0">
           <SheetTitle className="sr-only">Current order</SheetTitle>
           {cartPanel}
         </SheetContent>
@@ -234,20 +267,42 @@ function Register({ shiftId, cashierName }: { shiftId: string; cashierName: stri
           {receipt && (
             <div>
               <div className="no-print text-center">
-                <CheckCircle2 className="mx-auto size-12 text-success" />
+                <div className="mx-auto grid size-16 place-items-center rounded-full bg-success/15 animate-in zoom-in-50 duration-300"><CheckCircle2 className="size-9 text-success" /></div>
                 <div className="mt-3 text-lg font-semibold">Sale completed</div>
-                <div className="mt-1 text-3xl font-semibold tabular">{ksh(receipt.total)}</div>
+                <div className="mt-1 text-4xl font-semibold tracking-tight tabular">{ksh(receipt.total)}</div>
               </div>
               <Receipt r={receipt} cashier={cashierName} shiftId={shiftId} />
               <div className="no-print mt-4 grid grid-cols-2 gap-2">
-                <Button variant="outline" onClick={() => window.print()}><Printer />Print</Button>
-                <Button variant="gold" onClick={() => setReceipt(null)}>New sale</Button>
+                <Button variant="outline" size="lg" onClick={() => window.print()}><Printer />Print</Button>
+                <Button variant="gold" size="lg" onClick={() => setReceipt(null)}>New sale</Button>
               </div>
             </div>
           )}
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+function ProductTile({ p, catName, inCart, onAdd }: { p: Product; catName: string; inCart?: number | undefined; onAdd: () => void }) {
+  const stock = Number(p.stock_qty);
+  const out = stock <= 0;
+  const low = !out && stock <= Number(p.low_stock_threshold);
+  const Icon = CAT_ICON[catName] ?? Package;
+  const tint = CAT_TINT[catName] ?? NEUTRAL_TINT;
+  return (
+    <button type="button" disabled={out} onClick={onAdd} aria-label={`${p.name}, ${ksh(p.selling_price)}${out ? ", out of stock" : low ? `, ${stock} left` : ""}`}
+      className={cn("relative flex flex-col overflow-hidden rounded-2xl border bg-card p-2 text-left shadow-sm transition duration-150 active:scale-[0.97] enabled:hover:border-primary/40 disabled:opacity-45",
+        inCart && "border-primary/70 bg-primary/[0.07] ring-1 ring-primary/30")}>
+      <div className={cn("relative grid place-items-center overflow-hidden rounded-xl bg-linear-to-br", p.image_url ? "h-24" : "h-14", tint.chip)}>
+        {p.image_url ? <img src={p.image_url} alt="" className="size-full object-cover" loading="lazy" /> : <Icon className={cn("size-6", tint.icon)} strokeWidth={1.75} />}
+        {low && <span className="absolute left-1.5 top-1.5 rounded-full bg-warning px-1.5 py-0.5 text-[10px] font-semibold leading-none text-black">{stock} left</span>}
+        {out && <span className="absolute left-1.5 top-1.5 rounded-full bg-destructive px-1.5 py-0.5 text-[10px] font-semibold leading-none text-white">Out</span>}
+      </div>
+      <div className="mt-2 line-clamp-2 min-h-[2.25rem] px-0.5 text-[13px] font-medium leading-tight">{p.name}</div>
+      <div className="mt-1 whitespace-nowrap px-0.5 text-[15px] font-semibold tabular">{ksh(p.selling_price)}</div>
+      {inCart ? <span className="absolute right-2 top-2 grid size-6 place-items-center rounded-full bg-primary text-xs font-bold text-primary-foreground shadow-gold animate-in zoom-in-50 duration-150">{inCart}</span> : null}
+    </button>
   );
 }
 
@@ -277,6 +332,17 @@ function CatBtn({ active, onClick, icon: Icon, label }: { active: boolean; onCli
       className={cn("flex shrink-0 items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors",
         active ? "bg-primary/12 text-primary bg-accent font-medium" : "text-muted-foreground hover:bg-accent hover:text-foreground")}>
       <Icon className="size-4" />{label}
+    </button>
+  );
+}
+
+function CatChip({ active, onClick, icon: Icon, label, count }: { active: boolean; onClick: () => void; icon: typeof Beer; label: string; count?: number | undefined }) {
+  return (
+    <button type="button" onClick={onClick} aria-pressed={active}
+      className={cn("flex h-9 shrink-0 items-center gap-1.5 rounded-full border px-3.5 text-[13px] font-medium transition active:scale-95",
+        active ? "border-primary/50 bg-primary/15 text-primary" : "border-transparent bg-secondary/70 text-muted-foreground hover:text-foreground")}>
+      <Icon className="size-3.5" />{label}
+      {count != null && <span className={cn("text-[11px] tabular", active ? "text-primary/80" : "text-muted-foreground/70")}>{count}</span>}
     </button>
   );
 }

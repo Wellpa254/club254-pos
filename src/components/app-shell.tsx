@@ -63,6 +63,9 @@ export function AppShell({ area, title, actions, children, bare }: {
   }
 
   const allowed = !area || canAccess(roles, area);
+  // Phone bottom bar: the main areas, plus Shifts when there is room (cashiers need it to close their shift).
+  const mainNav = items.filter((n) => n.key !== "staff" && n.key !== "shifts" && n.key !== "shift_balance");
+  const mobileNav = (mainNav.length < 5 ? [...mainNav, ...items.filter((n) => n.key === "shifts")] : mainNav).slice(0, 5);
 
   return (
     <div className="min-h-screen lg:grid lg:grid-cols-[240px_1fr]">
@@ -129,7 +132,7 @@ export function AppShell({ area, title, actions, children, bare }: {
       </div>
 
       <nav className="fixed inset-x-0 bottom-0 z-40 flex border-t bg-sidebar/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md lg:hidden no-print">
-        {items.filter((n) => n.key !== "staff" && n.key !== "shifts" && n.key !== "shift_balance").slice(0, 5).map((n) => (
+        {mobileNav.map((n) => (
           <Link key={n.key} to={n.to}
             className="flex flex-1 flex-col items-center gap-1 py-2.5 text-[11px] text-muted-foreground"
             activeProps={{ className: "!text-primary" }}>
