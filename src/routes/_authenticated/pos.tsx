@@ -14,6 +14,7 @@ import { useMe } from "@/hooks/use-me";
 import { openShiftQuery, StartShift } from "@/components/start-shift";
 import { ksh, fmtTime, fmtDateTime, friendlyError } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { cashChange, quickCashAmounts } from "@/lib/cash";
 
 export const Route = createFileRoute("/_authenticated/pos")({
   head: () => ({ meta: [{ title: "POS — Club254" }, { name: "description", content: "Ring up sales at the bar." }] }),
@@ -60,7 +61,8 @@ function Register({ shiftId, openedAt, cashierName }: { shiftId: string; openedA
   const [discount, setDiscount] = useState("");
   const [pay, setPay] = useState<Pay>("cash");
   const [mobileCart, setMobileCart] = useState(false);
-  const [receipt, setReceipt] = useState<null | { receipt_no: string; total: number; created_at: string; lines: Line[]; discount: number; subtotal: number; pay: Pay }>(null);
+  const [cashIn, setCashIn] = useState("");
+  const [receipt, setReceipt] = useState<null | { receipt_no: string; total: number; created_at: string; lines: Line[]; discount: number; subtotal: number; pay: Pay; received?: number | undefined; change?: number | undefined }>(null);
   const clientRef = useRef<string>(crypto.randomUUID());
 
   const cats = useQuery({
@@ -107,6 +109,11 @@ function Register({ shiftId, openedAt, cashierName }: { shiftId: string; openedA
   const subtotal = cart.reduce((s, l) => s + l.qty * Number(l.product.selling_price), 0);
   const disc = Math.min(Number(discount || 0), subtotal);
   const total = subtotal - disc;
+  // Cash tendered is optional. When entered, it must cover the total, and the change is shown for the customer.
+  const cashing = pay === "cash" && cashIn !== "";
+  const received = Number(cashIn || 0);
+  const { change, short } = cashChange(total, received);
+  const cashShort = cashing && short > 0;
 
   const checkout = useMutation({
     mutationFn: async () => {
@@ -124,8 +131,8 @@ function Register({ shiftId, openedAt, cashierName }: { shiftId: string; openedA
       } catch (e) { if (isNetworkError(e)) return offline(); throw e; }
     },
     onSuccess: (r) => {
-      setReceipt({ ...r, lines: cart, discount: disc, subtotal, pay });
-      setCart([]); setDiscount(""); setMobileCart(false);
+      setReceipt({ ...r, lines: cart, discount: disc, subtotal, pay, ...(cashing ? { received, change } : {}) });
+      setCart([]); setDiscount(""); setCashIn(""); setMobileCart(false);
       clientRef.current = crypto.randomUUID();
       qc.invalidateQueries({ queryKey: ["pos-products"] });
       qc.invalidateQueries({ queryKey: ["my-sales"] });
@@ -141,7 +148,7 @@ function Register({ shiftId, openedAt, cashierName }: { shiftId: string; openedA
   }, [products.data]);
   const shownCats = (cats.data ?? []).filter((c) => (counts.get(c.id) ?? 0) > 0);
   // Closing the sheet when the order empties keeps the phone view from showing a big blank panel.
-  useEffect(() => { if (cart.length === 0) setMobileCart(false); }, [cart.length]);
+  useEffect(() => { if (cart.length === 0) { setMobileCart(false); setCashIn(""); } }, [cart.length]);
   const buzz = () => { try { navigator.vibrate?.(8); } catch { /* not supported */ } };
   const searchBox = (cls: string, placeholder: string) => (
     <div className="relative flex-1">
@@ -159,7 +166,7 @@ function Register({ shiftId, openedAt, cashierName }: { shiftId: string; openedA
           <span className="font-semibold">Current order</span>
           {itemCount > 0 && <span className="rounded-full bg-primary/15 px-2 py-0.5 text-xs font-semibold text-primary tabular">{itemCount}</span>}
         </div>
-        {cart.length > 0 && <Button variant="ghost" size="sm" onClick={() => setCart([])}>Clear</Button>}
+        {cart.length > 0 && <Button variant="ghost" size="sm" onClick={() => { setCart([]); setCashIn(""); }}>Clear</Button>}
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto px-3 py-2">
         {cart.length === 0 ? (
@@ -181,7 +188,7 @@ function Register({ shiftId, openedAt, cashierName }: { shiftId: string; openedA
           </div>
         ))}
       </div>
-      <div className="space-y-3 border-t bg-surface/60 p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
+      <div className="space-y-3 border-t bg-surface/60 p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] [@media(max-height:700px)]:space-y-2 [@media(max-height:700px)]:p-4 [@media(max-height:700px)]:pb-[max(1rem,env(safe-area-inset-bottom))]">
         <div className="flex justify-between text-sm"><span className="text-muted-foreground">Subtotal</span><span className="tabular">{ksh(subtotal)}</span></div>
         <div className="flex items-center justify-between gap-3 text-sm">
           <span className="text-muted-foreground">Discount</span>
@@ -190,14 +197,38 @@ function Register({ shiftId, openedAt, cashierName }: { shiftId: string; openedA
         <div className="flex items-baseline justify-between pt-1"><span className="font-medium">Total</span><span className="text-3xl font-semibold tracking-tight tabular">{ksh(total)}</span></div>
         <div className="grid grid-cols-4 gap-2" role="radiogroup" aria-label="Payment method">
           {PAY.map((p) => (
-            <button key={p.k} role="radio" aria-checked={pay === p.k} onClick={() => setPay(p.k)}
-              className={cn("flex h-16 flex-col items-center justify-center gap-1.5 rounded-xl border text-xs font-medium transition active:scale-95",
+            <button key={p.k} role="radio" aria-checked={pay === p.k} onClick={() => { setPay(p.k); if (p.k !== "cash") setCashIn(""); }}
+              className={cn("flex h-16 flex-col items-center justify-center gap-1.5 rounded-xl border text-xs font-medium transition active:scale-95 [@media(max-height:700px)]:h-14",
                 pay === p.k ? "border-primary bg-primary/10 text-primary ring-1 ring-primary/30" : "bg-card/60 text-muted-foreground hover:bg-accent")}>
               <p.i className="size-[18px]" />{p.l}
             </button>
           ))}
         </div>
-        <Button variant="gold" size="xl" className="h-14 w-full rounded-2xl text-base" disabled={!cart.length || checkout.isPending} onClick={() => checkout.mutate()}>
+        {pay === "cash" && total > 0 && (
+          <div className="space-y-2">
+            <div className="flex gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {[total, ...quickCashAmounts(total)].map((a, i) => (
+                <button key={a} type="button" onClick={() => setCashIn(String(a))}
+                  className={cn("h-9 shrink-0 rounded-full border px-3.5 text-[13px] font-medium tabular transition active:scale-95",
+                    cashIn === String(a) ? "border-primary/50 bg-primary/15 text-primary" : "border-transparent bg-secondary/70 text-muted-foreground hover:text-foreground")}>
+                  {i === 0 ? "Exact" : ksh(a)}
+                </button>
+              ))}
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="relative flex-1">
+                <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">KSh</span>
+                <Input inputMode="numeric" value={cashIn} onChange={(e) => setCashIn(e.target.value.replace(/[^\d]/g, "").slice(0, 8))} placeholder="Cash received" aria-label="Cash received" className="h-11 rounded-xl pl-12 text-right tabular" />
+              </div>
+              {cashing && (
+                <div className={cn("flex h-11 min-w-[7.5rem] items-center justify-center rounded-xl px-3 text-sm font-semibold tabular", cashShort ? "bg-warning/15 text-warning" : "bg-success/15 text-success")} aria-live="polite">
+                  {cashShort ? `Short ${ksh(short)}` : `Change ${ksh(change)}`}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+        <Button variant="gold" size="xl" className="h-14 w-full rounded-2xl text-base" disabled={!cart.length || checkout.isPending || cashShort} onClick={() => checkout.mutate()}>
           {checkout.isPending ? <Loader2 className="animate-spin" /> : null}Charge {ksh(total)}
         </Button>
       </div>
@@ -270,6 +301,13 @@ function Register({ shiftId, openedAt, cashierName }: { shiftId: string; openedA
                 <div className="mx-auto grid size-16 place-items-center rounded-full bg-success/15 animate-in zoom-in-50 duration-300"><CheckCircle2 className="size-9 text-success" /></div>
                 <div className="mt-3 text-lg font-semibold">Sale completed</div>
                 <div className="mt-1 text-4xl font-semibold tracking-tight tabular">{ksh(receipt.total)}</div>
+                {receipt.pay === "cash" && receipt.received != null && ((receipt.change ?? 0) > 0 ? (
+                  <div className="mt-3 rounded-xl bg-success/10 p-3">
+                    <div className="text-xs font-medium uppercase tracking-wide text-success">Change due</div>
+                    <div className="text-3xl font-semibold tracking-tight text-success tabular">{ksh(receipt.change ?? 0)}</div>
+                    <div className="text-xs text-muted-foreground tabular">from {ksh(receipt.received)} received</div>
+                  </div>
+                ) : <div className="mt-2 text-sm text-muted-foreground">Exact cash received</div>)}
               </div>
               <Receipt r={receipt} cashier={cashierName} shiftId={shiftId} />
               <div className="no-print mt-4 grid grid-cols-2 gap-2">
@@ -306,7 +344,7 @@ function ProductTile({ p, catName, inCart, onAdd }: { p: Product; catName: strin
   );
 }
 
-function Receipt({ r, cashier }: { r: { receipt_no: string; created_at: string; lines: Line[]; discount: number; subtotal: number; total: number; pay: Pay }; cashier: string; shiftId: string }) {
+function Receipt({ r, cashier }: { r: { receipt_no: string; created_at: string; lines: Line[]; discount: number; subtotal: number; total: number; pay: Pay; received?: number | undefined; change?: number | undefined }; cashier: string; shiftId: string }) {
   return (
     <div className="mt-5 rounded-lg border border-dashed p-4 font-mono text-xs">
       <div className="text-center"><div className="font-semibold">Club254</div><div className="text-muted-foreground">Thank you for your visit</div></div>
@@ -322,6 +360,12 @@ function Receipt({ r, cashier }: { r: { receipt_no: string; created_at: string; 
       {r.discount > 0 && <div className="flex justify-between"><span>Discount</span><span>-{ksh(r.discount)}</span></div>}
       <div className="flex justify-between font-semibold"><span>Total</span><span>{ksh(r.total)}</span></div>
       <div className="flex justify-between"><span>Paid by</span><span>{PAY.find((p) => p.k === r.pay)?.l}</span></div>
+      {r.pay === "cash" && r.received != null && (
+        <>
+          <div className="flex justify-between"><span>Cash received</span><span>{ksh(r.received)}</span></div>
+          <div className="flex justify-between"><span>Change</span><span>{ksh(r.change ?? 0)}</span></div>
+        </>
+      )}
     </div>
   );
 }
