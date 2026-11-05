@@ -117,9 +117,9 @@ function Register({ shiftId, openedAt, cashierName }: { shiftId: string; openedA
 
   const checkout = useMutation({
     mutationFn: async () => {
-      const args = { _client_ref: clientRef.current, _items: cart.map((l) => ({ product_id: l.product.id, quantity: l.qty })), _discount: disc, _payment: pay };
+      const args = { _client_ref: clientRef.current, _items: cart.map((l) => ({ product_id: l.product.id, quantity: l.qty })), _discount: disc, _payment: pay, ...(cashing ? { _cash_received: received } : {}) };
       const offline = () => {
-        queueSale({ client_ref: args._client_ref, items: args._items, discount: disc, payment: pay, total });
+        queueSale({ client_ref: args._client_ref, items: args._items, discount: disc, payment: pay, total, cash_received: cashing ? received : undefined });
         toast.info("Saved offline — it will upload when you're back online.");
         return { receipt_no: "OFFLINE (pending)", total, created_at: new Date().toISOString() };
       };

@@ -493,6 +493,7 @@ export type Database = {
       }
       sales: {
         Row: {
+          cash_received: number | null
           cashier_id: string
           client_ref: string
           created_at: string
@@ -506,6 +507,7 @@ export type Database = {
           total: number
         }
         Insert: {
+          cash_received?: number | null
           cashier_id: string
           client_ref: string
           created_at?: string
@@ -519,6 +521,7 @@ export type Database = {
           total: number
         }
         Update: {
+          cash_received?: number | null
           cashier_id?: string
           client_ref?: string
           created_at?: string
@@ -611,6 +614,7 @@ export type Database = {
       club_has_owner: { Args: never; Returns: boolean }
       complete_sale: {
         Args: {
+          _cash_received?: number
           _client_ref: string
           _discount: number
           _items: Json

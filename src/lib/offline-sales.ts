@@ -7,6 +7,7 @@ export type QueuedSale = {
   items: { product_id: string; quantity: number }[];
   discount: number;
   payment: string;
+  cash_received?: number | undefined;
   total: number;
   queued_at: string;
   error?: string;
@@ -54,7 +55,7 @@ export async function syncQueuedSales(): Promise<{ synced: number; failed: numbe
   let synced = 0, failed = 0;
   try {
     for (const s of read()) {
-      const { error } = await supabase.rpc("complete_sale", { _client_ref: s.client_ref, _items: s.items, _discount: s.discount, _payment: s.payment });
+      const { error } = await supabase.rpc("complete_sale", { _client_ref: s.client_ref, _items: s.items, _discount: s.discount, _payment: s.payment, ...(s.cash_received != null ? { _cash_received: s.cash_received } : {}) });
       if (!error) { synced++; write(read().filter((x) => x.client_ref !== s.client_ref)); continue; }
       if (isNetworkError(error)) break;
       failed++;

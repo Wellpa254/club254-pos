@@ -44,11 +44,11 @@ export async function loadReport(key: ReportKey, r: Range): Promise<Row[]> {
   }
   if (key === "sales") {
     const [{ data, error }, who] = await Promise.all([
-      supabase.from("sales").select("receipt_no, created_at, cashier_id, subtotal, discount, total, payment_method, status").gte("created_at", from(r)).lt("created_at", to(r)).order("created_at"),
+      supabase.from("sales").select("receipt_no, created_at, cashier_id, subtotal, discount, total, payment_method, cash_received, status").gte("created_at", from(r)).lt("created_at", to(r)).order("created_at"),
       names(),
     ]);
     if (error) throw error;
-    return (data ?? []).map((s) => ({ Receipt: s.receipt_no, Time: local(s.created_at), Cashier: who.get(s.cashier_id) ?? "", Payment: s.payment_method, "Subtotal (KSh)": Number(s.subtotal), "Discount (KSh)": Number(s.discount), "Total (KSh)": Number(s.total), Status: s.status }));
+    return (data ?? []).map((s) => ({ Receipt: s.receipt_no, Time: local(s.created_at), Cashier: who.get(s.cashier_id) ?? "", Payment: s.payment_method, "Subtotal (KSh)": Number(s.subtotal), "Discount (KSh)": Number(s.discount), "Total (KSh)": Number(s.total), "Cash received (KSh)": s.cash_received == null ? "" : Number(s.cash_received), "Change (KSh)": s.cash_received == null ? "" : Number(s.cash_received) - Number(s.total), Status: s.status }));
   }
   if (key === "products") {
     const { data, error } = await supabase.from("sale_items").select("product_name, quantity, subtotal, sales!inner(created_at, status)").gte("sales.created_at", from(r)).lt("sales.created_at", to(r)).eq("sales.status", "completed");
