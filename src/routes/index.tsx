@@ -23,7 +23,11 @@ export const Route = createFileRoute("/")({
           "POS, true stock costing, cashier shifts, purchases and daily profit — in KSh, on Nairobi time.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:image", content: "https://club-pos.club254.workers.dev/og-image.jpg" },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: "https://club-pos.club254.workers.dev/og-image.jpg" },
     ],
   }),
   component: Index,
@@ -67,20 +71,31 @@ function Index() {
 
 function SiteHeader() {
   return (
-    <header className="sticky top-0 z-50 border-b border-border/70 bg-background/80 backdrop-blur-xl">
-      <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-6 px-6">
+    <header className="sticky top-0 z-50 bg-background/60 backdrop-blur-xl">
+      <div className="mx-auto flex h-[4.5rem] w-full max-w-6xl items-center justify-between gap-6 px-6">
         <Link to="/" aria-label="Club254 home">
           <Brand subtitle={false} />
         </Link>
-        <div className="flex items-center gap-2">
-          <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
+        <div className="flex items-center gap-1.5">
+          <Button
+            asChild
+            variant="ghost"
+            size="sm"
+            className="hidden text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground hover:bg-transparent hover:text-foreground sm:inline-flex"
+          >
             <Link to="/auth">Sign in</Link>
           </Button>
-          <Button asChild variant="gold" size="sm">
+          <Button
+            asChild
+            variant="outline"
+            size="sm"
+            className="rounded-full border-[color-mix(in_oklab,var(--gold-2)_45%,transparent)] bg-transparent px-5 text-[11px] font-medium uppercase tracking-[0.2em] text-[var(--gold-1)] hover:border-[var(--gold-2)] hover:bg-[color-mix(in_oklab,var(--gold-2)_10%,transparent)]"
+          >
             <Link to="/auth">Open Club254</Link>
           </Button>
         </div>
       </div>
+      <span className="rule-gold absolute inset-x-0 bottom-0 opacity-50" aria-hidden />
     </header>
   );
 }
@@ -92,7 +107,7 @@ function SiteFooter() {
       <div className="mx-auto flex w-full max-w-6xl flex-col items-center gap-5 px-6 py-14 text-center">
         <BrandMark className="size-10" />
         <div className="display text-[1.9rem] leading-none tracking-tight">
-          Club<span className="text-gold italic">254</span>
+          Club<span className="text-gold italic [font-variant-numeric:lining-nums]">254</span>
         </div>
         <p className="max-w-sm text-xs leading-relaxed text-muted-foreground">
           Built for clubs, bars and lounges. Currency in KSh, every timestamp on Nairobi time.
@@ -113,45 +128,70 @@ function SiteFooter() {
 /* ------------------------------------------------------------- hero block */
 
 function Hero() {
+  // A soft light that follows the mouse on desktop. Touch screens ignore it.
+  const onMove = (e: React.PointerEvent<HTMLElement>) => {
+    if (e.pointerType !== "mouse") return;
+    const r = e.currentTarget.getBoundingClientRect();
+    e.currentTarget.style.setProperty("--mx", `${e.clientX - r.left}px`);
+    e.currentTarget.style.setProperty("--my", `${e.clientY - r.top}px`);
+  };
   return (
-    <section className="relative isolate flex min-h-[calc(100svh-4rem)] flex-col overflow-hidden">
+    <section
+      onPointerMove={onMove}
+      className="relative isolate flex min-h-[calc(100svh-4.5rem)] flex-col overflow-hidden"
+    >
       <img
         src={heroImg}
         alt=""
         aria-hidden
         width={1600}
         height={912}
-        className="absolute inset-0 size-full object-cover opacity-85"
+        className="hero-zoom absolute inset-0 size-full object-cover opacity-80 saturate-[0.82] contrast-[1.06]"
       />
       <div className="hero-veil absolute inset-0" aria-hidden />
       <div className="hero-veil-m absolute inset-0 sm:hidden" aria-hidden />
       <div className="veil-center absolute inset-0" aria-hidden />
       <div className="bg-hero absolute inset-0" aria-hidden />
+      <div className="hero-bloom pointer-events-none absolute inset-0" aria-hidden />
+      <div className="hero-spot pointer-events-none absolute inset-0 hidden sm:block" aria-hidden />
       <div className="grain-layer pointer-events-none absolute inset-0" aria-hidden />
+
       <div className="hero-frame absolute inset-3 sm:inset-5 lg:inset-7" aria-hidden>
         <span className="hero-corner -top-px -left-px border-t border-l" />
         <span className="hero-corner -top-px -right-px border-t border-r" />
         <span className="hero-corner -bottom-px -left-px border-b border-l" />
         <span className="hero-corner -bottom-px -right-px border-b border-r" />
+        <span className="hero-diamond -top-[3px] left-1/2 -translate-x-1/2" />
+        <span className="hero-diamond -bottom-[3px] left-1/2 -translate-x-1/2" />
       </div>
+      <div className="hero-frame-inner absolute inset-[1.375rem] sm:inset-8 lg:inset-[2.625rem]" aria-hidden />
 
-      <div className="relative mx-auto flex w-full max-w-6xl flex-1 flex-col items-center justify-center px-10 pb-14 pt-12 text-center">
+      <div className="relative mx-auto flex w-full max-w-6xl flex-1 flex-col items-center justify-center px-8 pb-16 pt-14 text-center sm:px-10">
         <h1 className="sr-only">Club254</h1>
-        <div
-          className="fade-up flex flex-col items-center gap-5"
-          style={{ animationDelay: "80ms" }}
-        >
-          <span className="rule-gold shimmer-rule w-16" aria-hidden />
-          <span className="eyebrow-gold max-w-lg">
-            Club Management &amp; Business Intelligence
-          </span>
+
+        <div className="lux-in flex items-center gap-4" style={{ animationDelay: "120ms" }} aria-hidden>
+          <span className="rule-gold w-16 sm:w-28" />
+          <span className="size-1.5 rotate-45 bg-[var(--gold-2)]/80" />
+          <span className="rule-gold w-16 sm:w-28" />
         </div>
 
-        <div
-          className="fade-up mt-10 flex w-full max-w-sm flex-col items-stretch gap-3 sm:w-auto sm:max-w-none sm:flex-row sm:items-center sm:justify-center"
-          style={{ animationDelay: "200ms" }}
+        <span
+          className="eyebrow-gold lux-in mt-8 max-w-xs text-balance !tracking-[0.38em] !leading-[2] sm:max-w-none sm:!tracking-[0.42em]"
+          style={{ animationDelay: "360ms" }}
         >
-          <Button asChild variant="gold" size="xl" className="sheen w-full sm:w-auto">
+          Club Management &amp; Business Intelligence
+        </span>
+
+        <div
+          className="hero-cta lux-in mt-12 flex w-full max-w-sm flex-col items-stretch gap-3 sm:mt-14 sm:w-auto sm:max-w-none sm:flex-row sm:items-center sm:justify-center sm:gap-4"
+          style={{ animationDelay: "700ms" }}
+        >
+          <Button
+            asChild
+            variant="gold"
+            size="xl"
+            className="sheen h-14 w-full rounded-full px-10 text-[12px] font-semibold uppercase tracking-[0.22em] sm:w-auto"
+          >
             <Link to="/auth">
               Open Club254
               <ArrowRight className="size-4" />
@@ -161,13 +201,12 @@ function Hero() {
             asChild
             variant="outline"
             size="xl"
-            className="w-full border-border/80 bg-background/70 text-foreground backdrop-blur-md hover:bg-background/90 sm:w-auto"
+            className="h-14 w-full rounded-full border-[color-mix(in_oklab,var(--gold-2)_40%,transparent)] bg-background/25 px-10 text-[12px] font-medium uppercase tracking-[0.22em] text-foreground backdrop-blur-md hover:border-[var(--gold-2)] hover:bg-background/45 sm:w-auto"
           >
             <Link to="/auth">Sign in</Link>
           </Button>
         </div>
       </div>
-
     </section>
   );
 }

@@ -333,6 +333,47 @@
 @utility fade-up {
   animation: fade-up 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
 }
+@utility hero-zoom {
+  transform-origin: 60% 50%;
+  animation: hero-zoom 28s ease-in-out infinite alternate;
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+@utility lux-in {
+  animation: lux-in 1.25s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+@utility hero-bloom {
+  background-image: radial-gradient(
+    46% 34% at 50% 40%,
+    color-mix(in oklab, var(--gold-2) 11%, transparent) 0%,
+    transparent 72%
+  );
+  mix-blend-mode: screen;
+}
+@utility hero-spot {
+  background-image: radial-gradient(
+    520px circle at var(--mx, 50%) var(--my, 42%),
+    color-mix(in oklab, var(--gold-1) 9%, transparent),
+    transparent 62%
+  );
+  mix-blend-mode: screen;
+}
+@utility hero-frame-inner {
+  position: absolute;
+  pointer-events: none;
+  border: 1px solid color-mix(in oklab, var(--gold-2) 8%, transparent);
+}
+@utility hero-diamond {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  rotate: 45deg;
+  background: color-mix(in oklab, var(--gold-1) 75%, transparent);
+}
 @utility veil-center {
   background-image: radial-gradient(
     60% 46% at 50% 52%,
@@ -361,6 +402,26 @@
   to {
     opacity: 1;
     transform: none;
+  }
+}
+@keyframes lux-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+    filter: blur(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+}
+@keyframes hero-zoom {
+  from {
+    transform: scale(1.02);
+  }
+  to {
+    transform: scale(1.09);
   }
 }
 @keyframes drift {

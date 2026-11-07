@@ -29,6 +29,7 @@ export default defineConfig(({ command }) => ({
       manifest: false,
       workbox: {
         globPatterns: ["**/*.{js,css,woff2,png,svg,ico,jpg,webp}"],
+        globIgnores: ["**/og-image.jpg"],
         navigateFallback: null,
         cleanupOutdatedCaches: true,
         runtimeCaching: [
