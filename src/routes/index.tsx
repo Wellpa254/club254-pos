@@ -148,9 +148,9 @@ function Hero() {
         height={912}
         className="hero-zoom absolute inset-0 size-full object-cover opacity-80 saturate-[0.82] contrast-[1.06]"
       />
-      <div className="hero-veil absolute inset-0" aria-hidden />
-      <div className="hero-veil-m absolute inset-0 sm:hidden" aria-hidden />
-      <div className="veil-center absolute inset-0" aria-hidden />
+      <div className="hero-veil absolute inset-0 hidden lg:block" aria-hidden />
+      <div className="hero-veil-bottom absolute inset-0 lg:hidden" aria-hidden />
+      <div className="veil-center absolute inset-0 hidden lg:block" aria-hidden />
       <div className="bg-hero absolute inset-0" aria-hidden />
       <div className="hero-bloom pointer-events-none absolute inset-0" aria-hidden />
       <div className="hero-spot pointer-events-none absolute inset-0 hidden sm:block" aria-hidden />
@@ -166,7 +166,7 @@ function Hero() {
       </div>
       <div className="hero-frame-inner absolute inset-[1.375rem] sm:inset-8 lg:inset-[2.625rem]" aria-hidden />
 
-      <div className="relative mx-auto flex w-full max-w-6xl flex-1 flex-col items-center justify-center px-8 pb-16 pt-14 text-center sm:px-10">
+      <div className="relative mx-auto flex w-full max-w-6xl flex-1 flex-col items-center justify-end px-8 pb-14 pt-14 text-center sm:px-10 sm:pb-16 lg:justify-center">
         <h1 className="sr-only">Blooms Members Club</h1>
 
         <div className="lux-in flex items-center gap-4" style={{ animationDelay: "120ms" }} aria-hidden>
@@ -183,14 +183,14 @@ function Hero() {
         </span>
 
         <div
-          className="hero-cta lux-in mt-12 flex w-full max-w-sm flex-col items-stretch gap-3 sm:mt-14 sm:w-auto sm:max-w-none sm:flex-row sm:items-center sm:justify-center sm:gap-4"
+          className="hero-cta lux-in mt-9 flex w-full max-w-sm flex-col items-stretch gap-3 lg:mt-14 lg:w-auto lg:max-w-none lg:flex-row lg:items-center lg:justify-center lg:gap-4"
           style={{ animationDelay: "700ms" }}
         >
           <Button
             asChild
             variant="gold"
             size="xl"
-            className="sheen h-14 w-full whitespace-nowrap rounded-full px-6 text-[11.5px] font-semibold uppercase tracking-[0.16em] sm:w-auto sm:px-10 sm:text-[12px] sm:tracking-[0.22em]"
+            className="sheen h-14 w-full whitespace-nowrap rounded-full px-6 text-[11.5px] font-semibold uppercase tracking-[0.16em] max-[380px]:px-3 max-[380px]:text-[10.5px] max-[380px]:tracking-[0.1em] sm:text-[12px] sm:tracking-[0.2em] lg:w-[22rem] lg:tracking-[0.22em]"
           >
             <Link to="/auth">
               Open Blooms Members Club
@@ -201,7 +201,7 @@ function Hero() {
             asChild
             variant="outline"
             size="xl"
-            className="h-14 w-full rounded-full border-[color-mix(in_oklab,var(--gold-2)_40%,transparent)] bg-background/25 px-10 text-[12px] font-medium uppercase tracking-[0.22em] text-foreground backdrop-blur-md hover:border-[var(--gold-2)] hover:bg-background/45 sm:w-auto"
+            className="h-14 w-full rounded-full border-[color-mix(in_oklab,var(--gold-2)_40%,transparent)] bg-background/25 px-6 text-[12px] font-medium uppercase tracking-[0.22em] text-foreground backdrop-blur-md hover:border-[var(--gold-2)] hover:bg-background/45 lg:w-[22rem]"
           >
             <Link to="/auth">Sign in</Link>
           </Button>
