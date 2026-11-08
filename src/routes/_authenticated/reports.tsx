@@ -13,7 +13,7 @@ import { ksh } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/reports")({
-  head: () => ({ meta: [{ title: "Reports — Club254" }, { name: "description", content: "Club reports with Excel export." }] }),
+  head: () => ({ meta: [{ title: "Reports — Blooms Members Club" }, { name: "description", content: "Club reports with Excel export." }] }),
   component: ReportsPage,
 });
 
@@ -31,7 +31,7 @@ function ReportsPage() {
     setBusy(true);
     try {
       const sheets = await Promise.all(REPORTS.map(async (x) => ({ key: x.key, name: x.label, rows: await loadReport(x.key, r) })));
-      await exportExcel(sheets, `club254-reports-${r.start}-to-${r.end}.xlsx`, { title: "Business Report", period: `${r.start} to ${r.end}` });
+      await exportExcel(sheets, `blooms-members-club-reports-${r.start}-to-${r.end}.xlsx`, { title: "Business Report", period: `${r.start} to ${r.end}` });
     } catch { toast.error("Could not build the export. Please try again."); }
     setBusy(false);
   }
@@ -41,7 +41,7 @@ function ReportsPage() {
       <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
         <div><div className="eyebrow">Reports center</div><h2 className="mt-1 text-2xl font-semibold tracking-tight">{fmtRange(r)}</h2></div>
         <div className="flex gap-2">
-          <Button variant="outline" disabled={!rows.length} onClick={() => exportExcel([{ key, name: meta.label, rows }], `club254-${key}-${r.start}-to-${r.end}.xlsx`, { period: `${r.start} to ${r.end}` })}><Download className="size-4" />This report</Button>
+          <Button variant="outline" disabled={!rows.length} onClick={() => exportExcel([{ key, name: meta.label, rows }], `blooms-members-club-${key}-${r.start}-to-${r.end}.xlsx`, { period: `${r.start} to ${r.end}` })}><Download className="size-4" />This report</Button>
           <Button onClick={exportAll} disabled={busy}><FileSpreadsheet className="size-4" />{busy ? "Preparing…" : "Export all to Excel"}</Button>
         </div>
       </div>

@@ -13,9 +13,9 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/_authenticated/shift-balance")({
   head: () => ({
     meta: [
-      { title: "Shift Balance — Club254" },
+      { title: "Shift Balance — Blooms Members Club" },
       { name: "description", content: "Opening cash, sales, expenses and closing cash for every cashier shift, reconciled." },
-      { property: "og:title", content: "Shift Balance — Club254" },
+      { property: "og:title", content: "Shift Balance — Blooms Members Club" },
       { property: "og:description", content: "Reconcile every cashier shift's drawer." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

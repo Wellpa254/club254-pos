@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils";
 import { cashChange, quickCashAmounts } from "@/lib/cash";
 
 export const Route = createFileRoute("/_authenticated/pos")({
-  head: () => ({ meta: [{ title: "POS — Club254" }, { name: "description", content: "Ring up sales at the bar." }] }),
+  head: () => ({ meta: [{ title: "POS — Blooms Members Club" }, { name: "description", content: "Ring up sales at the bar." }] }),
   component: PosPage,
 });
 
@@ -347,7 +347,7 @@ function ProductTile({ p, catName, inCart, onAdd }: { p: Product; catName: strin
 function Receipt({ r, cashier }: { r: { receipt_no: string; created_at: string; lines: Line[]; discount: number; subtotal: number; total: number; pay: Pay; received?: number | undefined; change?: number | undefined }; cashier: string; shiftId: string }) {
   return (
     <div className="mt-5 rounded-lg border border-dashed p-4 font-mono text-xs">
-      <div className="text-center"><div className="font-semibold">Club254</div><div className="text-muted-foreground">Thank you for your visit</div></div>
+      <div className="text-center"><div className="font-semibold">Blooms Members Club</div><div className="text-muted-foreground">Thank you for your visit</div></div>
       <div className="mt-3 flex justify-between"><span>Receipt</span><span>#{r.receipt_no}</span></div>
       <div className="flex justify-between"><span>Date</span><span>{fmtDateTime(r.created_at)}</span></div>
       <div className="flex justify-between"><span>Cashier</span><span>{cashier}</span></div>

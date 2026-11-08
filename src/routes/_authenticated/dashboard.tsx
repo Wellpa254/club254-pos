@@ -14,7 +14,7 @@ import { computePnl, sumRows } from "@/lib/pnl";
 import { fmtRange, groupRows, pctChange, previousRange, daysBetween } from "@/lib/periods";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
-  head: () => ({ meta: [{ title: "Dashboard — Club254" }, { name: "description", content: "Your club's performance at a glance." }] }),
+  head: () => ({ meta: [{ title: "Dashboard — Blooms Members Club" }, { name: "description", content: "Your club's performance at a glance." }] }),
   component: Dashboard,
 });
 

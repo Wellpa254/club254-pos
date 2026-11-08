@@ -18,7 +18,7 @@ import { useMe } from "@/hooks/use-me";
 import { fmtDateTime } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/staff")({
-  head: () => ({ meta: [{ title: "Staff — Club254" }, { name: "description", content: "Create staff logins and assign roles." }] }),
+  head: () => ({ meta: [{ title: "Staff — Blooms Members Club" }, { name: "description", content: "Create staff logins and assign roles." }] }),
   component: StaffPage,
 });
 

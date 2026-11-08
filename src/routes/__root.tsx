@@ -75,9 +75,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
-      { title: "Club254 — Club Management & Business Intelligence" },
+      { title: "Blooms Members Club — Club Management & Business Intelligence" },
       { name: "description", content: "POS, inventory, shifts and financial intelligence for clubs, bars and lounges." },
-      { property: "og:title", content: "Club254 — Club Management & Business Intelligence" },
+      { property: "og:title", content: "Blooms Members Club — Club Management & Business Intelligence" },
       { property: "og:description", content: "POS, inventory, shifts and financial intelligence for clubs, bars and lounges." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

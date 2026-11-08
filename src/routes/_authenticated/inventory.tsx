@@ -18,7 +18,7 @@ import { ksh, fmtDateTime, friendlyError } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/inventory")({
-  head: () => ({ meta: [{ title: "Inventory — Club254" }, { name: "description", content: "Stock levels, valuation and movements." }] }),
+  head: () => ({ meta: [{ title: "Inventory — Blooms Members Club" }, { name: "description", content: "Stock levels, valuation and movements." }] }),
   component: InventoryPage,
 });
 

@@ -1,4 +1,4 @@
-# Club254: fresh backend + free hosting (Supabase + Cloudflare Workers)
+# Blooms Members Club: fresh backend + free hosting (Supabase + Cloudflare Workers)
 
 ## One-time setup
 1. Supabase: create a new project. SQL Editor -> paste fresh-setup.sql -> Run.

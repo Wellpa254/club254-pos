@@ -15,10 +15,10 @@ export const Route = createFileRoute("/auth")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Sign in — Club254" },
-      { name: "description", content: "Sign in to Club254 to run sales, stock and shifts for your club." },
-      { property: "og:title", content: "Sign in — Club254" },
-      { property: "og:description", content: "Sign in to Club254 to run sales, stock and shifts for your club." },
+      { title: "Sign in — Blooms Members Club" },
+      { name: "description", content: "Sign in to Blooms Members Club to run sales, stock and shifts for your club." },
+      { property: "og:title", content: "Sign in — Blooms Members Club" },
+      { property: "og:description", content: "Sign in to Blooms Members Club to run sales, stock and shifts for your club." },
     ],
   }),
   component: AuthPage,
@@ -80,7 +80,7 @@ function AuthPage() {
 
   const title = mode === "signin" ? "Welcome back" : mode === "forgot" ? "Reset your password" : "Set up your club";
   const sub =
-    mode === "signin" ? "Sign in to your Club254 workspace."
+    mode === "signin" ? "Sign in to your Blooms Members Club workspace."
     : mode === "forgot" ? "We'll email you a secure link."
     : "Create the owner account. Staff are invited from inside the app.";
 
@@ -160,7 +160,7 @@ function AuthPage() {
 
           {hasOwner === false && mode === "signin" && !sent && (
             <div className="mt-8 rounded-lg border border-dashed p-4 text-sm">
-              <p className="text-muted-foreground">New to Club254? No owner has been set up yet.</p>
+              <p className="text-muted-foreground">New to Blooms Members Club? No owner has been set up yet.</p>
               <Button variant="link" className="px-0" onClick={() => setMode("setup")}>Set up your club →</Button>
             </div>
           )}

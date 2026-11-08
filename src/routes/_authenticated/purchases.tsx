@@ -19,7 +19,7 @@ import { ksh, friendlyError } from "@/lib/format";
 import { todayNairobi } from "@/lib/periods";
 
 export const Route = createFileRoute("/_authenticated/purchases")({
-  head: () => ({ meta: [{ title: "Purchases & Suppliers — Club254" }, { name: "description", content: "Record supplier deliveries and track what you owe." }] }),
+  head: () => ({ meta: [{ title: "Purchases & Suppliers — Blooms Members Club" }, { name: "description", content: "Record supplier deliveries and track what you owe." }] }),
   component: PurchasesPage,
 });
 

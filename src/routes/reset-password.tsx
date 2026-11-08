@@ -13,10 +13,10 @@ export const Route = createFileRoute("/reset-password")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Choose a new password — Club254" },
-      { name: "description", content: "Set a new password for your Club254 account." },
-      { property: "og:title", content: "Choose a new password — Club254" },
-      { property: "og:description", content: "Set a new password for your Club254 account." },
+      { title: "Choose a new password — Blooms Members Club" },
+      { name: "description", content: "Set a new password for your Blooms Members Club account." },
+      { property: "og:title", content: "Choose a new password — Blooms Members Club" },
+      { property: "og:description", content: "Set a new password for your Blooms Members Club account." },
     ],
   }),
   component: ResetPassword,

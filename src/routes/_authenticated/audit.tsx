@@ -13,7 +13,7 @@ import { exportExcel } from "@/lib/reports";
 import { fmtDateTime } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/audit")({
-  head: () => ({ meta: [{ title: "Audit log — Club254" }, { name: "description", content: "Who changed what, and when." }] }),
+  head: () => ({ meta: [{ title: "Audit log — Blooms Members Club" }, { name: "description", content: "Who changed what, and when." }] }),
   component: AuditPage,
 });
 
@@ -42,7 +42,7 @@ function AuditPage() {
     <AppShell area="audit" title="Audit log" actions={<PeriodPicker period={period} />}>
       <div className="mb-4 flex flex-wrap gap-2">
         <Input placeholder="Search action, person or details" value={search} onChange={(e) => setSearch(e.target.value)} className="max-w-sm" />
-        <Button variant="outline" disabled={!rows.length} onClick={() => exportExcel([{ name: "Audit log", rows: rows.map((a) => ({ Time: fmtDateTime(a.created_at), Who: a.who, Action: a.action, Object: a.object_type, "Object ID": a.object_id, Before: short(a.previous_value), After: short(a.new_value) })) }], `club254-audit-${r.start}-to-${r.end}.xlsx`, { period: `${r.start} to ${r.end}` })}><Download className="size-4" />Export</Button>
+        <Button variant="outline" disabled={!rows.length} onClick={() => exportExcel([{ name: "Audit log", rows: rows.map((a) => ({ Time: fmtDateTime(a.created_at), Who: a.who, Action: a.action, Object: a.object_type, "Object ID": a.object_id, Before: short(a.previous_value), After: short(a.new_value) })) }], `blooms-members-club-audit-${r.start}-to-${r.end}.xlsx`, { period: `${r.start} to ${r.end}` })}><Download className="size-4" />Export</Button>
       </div>
       <div className="surface-card divide-y">
         {q.isLoading ? <div className="space-y-2 p-4">{[0, 1, 2].map((i) => <Skeleton key={i} className="h-10" />)}</div>

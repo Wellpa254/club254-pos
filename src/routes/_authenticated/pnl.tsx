@@ -10,7 +10,7 @@ import { ksh } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/pnl")({
-  head: () => ({ meta: [{ title: "Profit & Loss — Club254" }, { name: "description", content: "Revenue, cost of goods, expenses and net profit." }] }),
+  head: () => ({ meta: [{ title: "Profit & Loss — Blooms Members Club" }, { name: "description", content: "Revenue, cost of goods, expenses and net profit." }] }),
   component: PnlPage,
 });
 

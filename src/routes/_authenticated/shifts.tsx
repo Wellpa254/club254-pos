@@ -15,7 +15,7 @@ import { openShiftQuery, StartShift } from "@/components/start-shift";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/shifts")({
-  head: () => ({ meta: [{ title: "Shifts — Club254" }, { name: "description", content: "Open, close and review cashier shifts." }] }),
+  head: () => ({ meta: [{ title: "Shifts — Blooms Members Club" }, { name: "description", content: "Open, close and review cashier shifts." }] }),
   component: ShiftsPage,
 });
 

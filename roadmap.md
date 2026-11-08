@@ -1,4 +1,4 @@
-# Club254 roadmap
+# Blooms Members Club roadmap
 
 ## Phase 1 — Foundation + POS (done)
 - [x] Sign-in, forgot/reset password, profile, first-owner setup

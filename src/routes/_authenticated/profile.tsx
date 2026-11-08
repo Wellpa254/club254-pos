@@ -13,7 +13,7 @@ import { ROLE_LABEL } from "@/lib/roles";
 import { friendlyError } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/profile")({
-  head: () => ({ meta: [{ title: "Your profile — Club254" }, { name: "description", content: "Manage your Club254 profile and password." }] }),
+  head: () => ({ meta: [{ title: "Your profile — Blooms Members Club" }, { name: "description", content: "Manage your Blooms Members Club profile and password." }] }),
   component: Profile,
 });
 

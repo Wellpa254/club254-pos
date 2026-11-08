@@ -18,7 +18,7 @@ import { todayNairobi } from "@/lib/periods";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/expenses")({
-  head: () => ({ meta: [{ title: "Expenses — Club254" }, { name: "description", content: "Record and review operating expenses." }] }),
+  head: () => ({ meta: [{ title: "Expenses — Blooms Members Club" }, { name: "description", content: "Record and review operating expenses." }] }),
   component: ExpensesPage,
 });
 

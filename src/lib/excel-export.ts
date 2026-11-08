@@ -117,7 +117,7 @@ const NO_SUM = /Avg cost|Selling price/;
 export async function buildWorkbook(sheets: XSheet[], opts: { title: string; period: string; generated: string }) {
   const ExcelJS = (await import("exceljs")).default;
   const wb = new ExcelJS.Workbook();
-  wb.creator = "Club254";
+  wb.creator = "Blooms Members Club";
   wb.created = new Date();
   const { kpis, charts } = summarize(sheets);
   const withDash = kpis.length > 0 || charts.length > 0;
@@ -136,7 +136,7 @@ export async function buildWorkbook(sheets: XSheet[], opts: { title: string; per
     // Header band
     for (let c = 2; c <= W + 1; c++) { ws.getCell(2, c).fill = fill(C.panel); ws.getCell(3, c).fill = fill(C.panel); ws.getCell(4, c).fill = fill(C.panel); ws.getCell(4, c).border = { bottom: { style: "medium", color: { argb: "FF" + C.gold } } }; }
     ws.getRow(2).height = 20; ws.getRow(3).height = 34; ws.getRow(4).height = 22;
-    put(2, 2, "◆  CLUB254", font(C.gold, 10, true, { charSpacing: 2 }));
+    put(2, 2, "◆  BLOOMS MEMBERS CLUB", font(C.gold, 10, true, { charSpacing: 2 }));
     put(3, 2, opts.title, font(C.text, 22, true, { name: "Georgia" }));
     put(4, 2, `Report period: ${opts.period}`, font(C.muted, 10));
     put(2, W + 1, "CONFIDENTIAL", font(C.gold, 9, true), { alignment: { horizontal: "right" } });
@@ -178,7 +178,7 @@ export async function buildWorkbook(sheets: XSheet[], opts: { title: string; per
       placed.push({ ...ch, catRef: `Dashboard!${L(col)}`, valRefs: ch.series.map((_, j) => `Dashboard!${L(col + 1 + j)}`), anchor: { c1: 1 + (i % 2) * half, r1: row0 - 1, c2: 1 + (i % 2) * half + half, r2: row0 - 1 + rowsPer, o1: i % 2 ? 90000 : 0, o2: i % 2 ? 0 : -90000 } });
     });
     const foot = dataTop + Math.ceil(Math.max(charts.length, 1) / 4) * 36;
-    put(foot, 2, "Club254  •  Figures in KSh, Africa/Nairobi time  •  Generated from your live records", font(C.muted, 8, false, { italic: true }));
+    put(foot, 2, "Blooms Members Club  •  Figures in KSh, Africa/Nairobi time  •  Generated from your live records", font(C.muted, 8, false, { italic: true }));
   }
 
   // Data sheets
@@ -190,7 +190,7 @@ export async function buildWorkbook(sheets: XSheet[], opts: { title: string; per
     for (let r = 1; r <= 3; r++) for (let c = 1; c <= n; c++) ws.getCell(r, c).fill = fill(C.panel);
     ws.getRow(1).height = 28;
     Object.assign(ws.getCell(1, 1), { value: s.name, font: font(C.text, 16, true, { name: "Georgia" }) });
-    Object.assign(ws.getCell(2, 1), { value: `Club254  •  ${opts.period}  •  ${rows === s.rows ? rows.length : 0} rows`, font: font(C.muted, 9) });
+    Object.assign(ws.getCell(2, 1), { value: `Blooms Members Club  •  ${opts.period}  •  ${rows === s.rows ? rows.length : 0} rows`, font: font(C.muted, 9) });
     if (withDash) Object.assign(ws.getCell(2, n), { value: { text: "‹ Dashboard", hyperlink: "#Dashboard!A1" }, font: font(C.gold, 9, true), alignment: { horizontal: "right" } });
     for (let c = 1; c <= n; c++) ws.getCell(3, c).border = { bottom: { style: "medium", color: { argb: "FF" + C.gold } } };
 

@@ -10,13 +10,13 @@ import { homeFor, type Role } from "@/lib/roles";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Club254 — Run your club on real numbers" },
+      { title: "Blooms Members Club — Run your club on real numbers" },
       {
         name: "description",
         content:
-          "Club254 brings the till, the stock room, the cash drawer and daily profit into one calm system for Kenyan clubs, bars and lounges.",
+          "Blooms Members Club brings the till, the stock room, the cash drawer and daily profit into one calm system for Kenyan clubs, bars and lounges.",
       },
-      { property: "og:title", content: "Club254 — Run your club on real numbers" },
+      { property: "og:title", content: "Blooms Members Club — Run your club on real numbers" },
       {
         property: "og:description",
         content:
@@ -73,7 +73,7 @@ function SiteHeader() {
   return (
     <header className="sticky top-0 z-50 bg-background/60 backdrop-blur-xl">
       <div className="mx-auto flex h-[4.5rem] w-full max-w-6xl items-center justify-between gap-6 px-6">
-        <Link to="/" aria-label="Club254 home">
+        <Link to="/" aria-label="Blooms Members Club home">
           <Brand subtitle={false} />
         </Link>
         <div className="flex items-center gap-1.5">
@@ -89,9 +89,9 @@ function SiteHeader() {
             asChild
             variant="outline"
             size="sm"
-            className="rounded-full border-[color-mix(in_oklab,var(--gold-2)_45%,transparent)] bg-transparent px-5 text-[11px] font-medium uppercase tracking-[0.2em] text-[var(--gold-1)] hover:border-[var(--gold-2)] hover:bg-[color-mix(in_oklab,var(--gold-2)_10%,transparent)]"
+            className="hidden whitespace-nowrap rounded-full border-[color-mix(in_oklab,var(--gold-2)_45%,transparent)] bg-transparent px-5 text-[11px] font-medium uppercase tracking-[0.2em] text-[var(--gold-1)] sm:inline-flex hover:border-[var(--gold-2)] hover:bg-[color-mix(in_oklab,var(--gold-2)_10%,transparent)]"
           >
-            <Link to="/auth">Open Club254</Link>
+            <Link to="/auth">Open Blooms Members Club</Link>
           </Button>
         </div>
       </div>
@@ -107,7 +107,7 @@ function SiteFooter() {
       <div className="mx-auto flex w-full max-w-6xl flex-col items-center gap-5 px-6 py-14 text-center">
         <BrandMark className="size-10" />
         <div className="display text-[1.9rem] leading-none tracking-tight">
-          Club<span className="text-gold italic [font-variant-numeric:lining-nums]">254</span>
+          <span className="text-gold italic">Blooms</span> Members Club
         </div>
         <p className="max-w-sm text-xs leading-relaxed text-muted-foreground">
           Built for clubs, bars and lounges. Currency in KSh, every timestamp on Nairobi time.
@@ -118,7 +118,7 @@ function SiteFooter() {
             Sign in
           </Link>
           <span className="hidden size-1 rotate-45 bg-primary/50 sm:block" aria-hidden />
-          <div className="tabular">© 2026 Club254 · Africa/Nairobi</div>
+          <div className="tabular">© 2026 Blooms Members Club · Africa/Nairobi</div>
         </div>
       </div>
     </footer>
@@ -167,7 +167,7 @@ function Hero() {
       <div className="hero-frame-inner absolute inset-[1.375rem] sm:inset-8 lg:inset-[2.625rem]" aria-hidden />
 
       <div className="relative mx-auto flex w-full max-w-6xl flex-1 flex-col items-center justify-center px-8 pb-16 pt-14 text-center sm:px-10">
-        <h1 className="sr-only">Club254</h1>
+        <h1 className="sr-only">Blooms Members Club</h1>
 
         <div className="lux-in flex items-center gap-4" style={{ animationDelay: "120ms" }} aria-hidden>
           <span className="rule-gold w-16 sm:w-28" />
@@ -190,10 +190,10 @@ function Hero() {
             asChild
             variant="gold"
             size="xl"
-            className="sheen h-14 w-full rounded-full px-10 text-[12px] font-semibold uppercase tracking-[0.22em] sm:w-auto"
+            className="sheen h-14 w-full whitespace-nowrap rounded-full px-6 text-[11.5px] font-semibold uppercase tracking-[0.16em] sm:w-auto sm:px-10 sm:text-[12px] sm:tracking-[0.22em]"
           >
             <Link to="/auth">
-              Open Club254
+              Open Blooms Members Club
               <ArrowRight className="size-4" />
             </Link>
           </Button>
