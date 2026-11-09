@@ -150,7 +150,7 @@ function Hero() {
       />
       <div className="hero-veil absolute inset-0 hidden lg:block" aria-hidden />
       <div className="hero-veil-bottom absolute inset-0 lg:hidden" aria-hidden />
-      <div className="veil-center absolute inset-0 hidden lg:block" aria-hidden />
+      <div className="hero-veil-desktop absolute inset-0 hidden lg:block" aria-hidden />
       <div className="bg-hero absolute inset-0" aria-hidden />
       <div className="hero-bloom pointer-events-none absolute inset-0" aria-hidden />
       <div className="hero-spot pointer-events-none absolute inset-0 hidden sm:block" aria-hidden />
@@ -166,24 +166,28 @@ function Hero() {
       </div>
       <div className="hero-frame-inner absolute inset-[1.375rem] sm:inset-8 lg:inset-[2.625rem]" aria-hidden />
 
-      <div className="relative mx-auto flex w-full max-w-6xl flex-1 flex-col items-center justify-end px-8 pb-14 pt-14 text-center sm:px-10 sm:pb-16 lg:justify-center">
+      <div className="relative mx-auto flex w-full max-w-6xl flex-1 flex-col items-center justify-end px-8 pb-14 pt-14 text-center sm:px-10 sm:pb-16 lg:px-16 lg:pb-[4.5rem]">
         <h1 className="sr-only">Blooms Members Club</h1>
 
-        <div className="lux-in flex items-center gap-4" style={{ animationDelay: "120ms" }} aria-hidden>
+        <div className="lux-in flex items-center gap-4 lg:hidden" style={{ animationDelay: "120ms" }} aria-hidden>
           <span className="rule-gold w-16 sm:w-28" />
           <span className="size-1.5 rotate-45 bg-[var(--gold-2)]/80" />
           <span className="rule-gold w-16 sm:w-28" />
         </div>
 
-        <span
-          className="eyebrow-gold lux-in mt-8 max-w-xs text-balance !tracking-[0.38em] !leading-[2] sm:max-w-none sm:!tracking-[0.42em]"
+        <div
+          className="lux-in mt-8 flex w-full max-w-sm items-center justify-center lg:mt-0 lg:max-w-4xl lg:gap-8"
           style={{ animationDelay: "360ms" }}
         >
-          Club Management &amp; Business Intelligence
-        </span>
+          <span className="rule-gold hidden flex-1 lg:block" aria-hidden />
+          <span className="eyebrow-gold max-w-xs text-balance !tracking-[0.38em] !leading-[2] sm:max-w-none sm:!tracking-[0.42em] lg:whitespace-nowrap">
+            Club Management &amp; Business Intelligence
+          </span>
+          <span className="rule-gold hidden flex-1 lg:block" aria-hidden />
+        </div>
 
         <div
-          className="hero-cta lux-in mt-9 flex w-full max-w-sm flex-col items-stretch gap-3 lg:mt-14 lg:w-auto lg:max-w-none lg:flex-row lg:items-center lg:justify-center lg:gap-4"
+          className="hero-cta lux-in mt-9 flex w-full max-w-sm flex-col items-stretch gap-3 lg:mt-9 lg:w-auto lg:max-w-none lg:flex-row lg:items-center lg:justify-center lg:gap-4"
           style={{ animationDelay: "700ms" }}
         >
           <Button
