@@ -74,8 +74,8 @@ export function AppShell({ area, title, actions, children, bare }: {
         <nav className="mt-8 flex flex-1 flex-col gap-0.5">
           {items.map((n) => (
             <Link key={n.key} to={n.to}
-              className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-sidebar-foreground/75 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-              activeProps={{ className: "bg-sidebar-accent !text-sidebar-accent-foreground font-medium" }}>
+              className="relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-sidebar-foreground/75 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              activeProps={{ className: "bg-sidebar-accent !text-sidebar-accent-foreground font-medium before:absolute before:inset-y-2 before:left-0 before:w-[2px] before:rounded-full before:bg-[var(--gold-2)] [&_svg]:text-[var(--gold-1)]" }}>
               <n.icon className="size-4" />{n.label}
             </Link>
           ))}
@@ -83,7 +83,7 @@ export function AppShell({ area, title, actions, children, bare }: {
         <div className="border-t pt-4">
           {me ? (
             <Link to="/profile" className="flex items-center gap-3 rounded-lg px-2 py-2 hover:bg-sidebar-accent">
-              <div className="grid size-8 place-items-center rounded-full bg-secondary text-xs font-semibold">
+              <div className="grid size-8 place-items-center rounded-full bg-secondary text-xs font-semibold ring-1 ring-[color-mix(in_oklab,var(--gold-2)_35%,transparent)]">
                 {me.fullName.slice(0, 2).toUpperCase()}
               </div>
               <div className="min-w-0 leading-tight">
@@ -107,13 +107,14 @@ export function AppShell({ area, title, actions, children, bare }: {
               <House className="size-[18px]" />
             </Link>
           </Button>
-          <h1 className="truncate text-[15px] font-semibold tracking-tight">{title}</h1>
+          <h1 className="display truncate text-[1.5rem] font-medium leading-none tracking-tight">{title}</h1>
           <div className="ml-auto flex items-center gap-2">
             {me && <GlobalSearch />}
             {allowed && !isLoading && actions}
             <Button variant="ghost" size="icon" className="lg:hidden" onClick={theme.toggle} aria-label="Toggle theme">{theme.light ? <Moon /> : <Sun />}</Button>
             <Link to="/profile" className="lg:hidden" aria-label="Profile"><UserCircle className="size-6 text-muted-foreground" /></Link>
           </div>
+          <span className="rule-gold pointer-events-none absolute inset-x-0 bottom-0 opacity-45" aria-hidden />
         </header>
         <OfflineBar />
         <main className={cn("flex-1", !bare && "px-4 py-6 lg:px-8 lg:py-8")}>
@@ -134,8 +135,8 @@ export function AppShell({ area, title, actions, children, bare }: {
       <nav className="fixed inset-x-0 bottom-0 z-40 flex border-t bg-sidebar/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md lg:hidden no-print">
         {mobileNav.map((n) => (
           <Link key={n.key} to={n.to}
-            className="flex flex-1 flex-col items-center gap-1 py-2.5 text-[11px] text-muted-foreground"
-            activeProps={{ className: "!text-primary" }}>
+            className="relative flex flex-1 flex-col items-center gap-1 py-2.5 text-[11px] text-muted-foreground"
+            activeProps={{ className: "!text-primary before:absolute before:left-1/2 before:top-0 before:h-[2px] before:w-8 before:-translate-x-1/2 before:rounded-full before:bg-[var(--gold-2)]" }}>
             <n.icon className="size-5" />{n.key === "pnl" ? "P&L" : n.label}
           </Link>
         ))}
@@ -146,9 +147,9 @@ export function AppShell({ area, title, actions, children, bare }: {
 
 export function StatCard({ label, value, hint, tone }: { label: string; value: ReactNode; hint?: ReactNode; tone?: "warn" | "bad" | "good" | undefined }) {
   return (
-    <div className="surface-card p-5">
+    <div className="surface-card relative overflow-hidden p-5 before:absolute before:inset-x-6 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-[color-mix(in_oklab,var(--gold-2)_55%,transparent)] before:to-transparent">
       <div className="eyebrow">{label}</div>
-      <div className={cn("mt-2 text-2xl font-semibold tracking-tight tabular",
+      <div className={cn("display mt-2 text-[2rem] font-medium leading-none tracking-tight [font-variant-numeric:lining-nums]",
         tone === "warn" && "text-warning", tone === "bad" && "text-destructive", tone === "good" && "text-success")}>{value}</div>
       {hint && <div className="mt-1 text-xs text-muted-foreground">{hint}</div>}
     </div>
@@ -158,7 +159,7 @@ export function StatCard({ label, value, hint, tone }: { label: string; value: R
 export function EmptyState({ title, body, icon: Icon }: { title: string; body: string; icon: typeof Lock }) {
   return (
     <div className="flex flex-col items-center px-6 py-14 text-center">
-      <div className="grid size-12 place-items-center rounded-xl bg-secondary"><Icon className="size-5 text-muted-foreground" /></div>
+      <div className="grid size-12 place-items-center rounded-full bg-secondary ring-1 ring-[color-mix(in_oklab,var(--gold-2)_30%,transparent)]"><Icon className="size-5 text-[var(--gold-1)]/80" /></div>
       <p className="mt-4 font-medium">{title}</p>
       <p className="mt-1 max-w-xs text-sm text-muted-foreground">{body}</p>
     </div>

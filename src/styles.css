@@ -168,6 +168,24 @@
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
   }
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in oklab, var(--gold-2) 28%, transparent) transparent;
+  }
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: color-mix(in oklab, var(--gold-2) 26%, transparent);
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in oklab, var(--gold-2) 46%, transparent);
+  }
   ::selection {
     background-color: color-mix(in oklab, var(--gold-2) 35%, transparent);
     color: var(--foreground);
@@ -251,6 +269,21 @@
       color-mix(in oklab, var(--background) 44%, transparent) 48%,
       color-mix(in oklab, var(--background) 4%, transparent) 100%
     );
+}
+@utility splash-ring {
+  border: 1px solid color-mix(in oklab, var(--gold-2) 32%, transparent);
+  animation: splash-pulse 2.2s ease-out infinite;
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+@utility splash-bar {
+  background-image: linear-gradient(90deg, transparent, var(--gold-2), transparent);
+  background-size: 200% 100%;
+  animation: splash-sweep 1.6s ease-in-out infinite;
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
 }
 @utility hero-veil-desktop {
   background-image: linear-gradient(
@@ -422,6 +455,24 @@
   to {
     opacity: 1;
     transform: none;
+  }
+}
+@keyframes splash-pulse {
+  0% {
+    transform: scale(0.72);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1.35);
+    opacity: 0;
+  }
+}
+@keyframes splash-sweep {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
   }
 }
 @keyframes lux-in {

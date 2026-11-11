@@ -26,7 +26,21 @@ export default defineConfig(({ command }) => ({
       registerType: "autoUpdate",
       injectRegister: null,
       devOptions: { enabled: false },
-      manifest: false,
+      manifest: {
+        name: "Blooms Members Club",
+        short_name: "Blooms",
+        description: "POS, inventory, shifts and financial intelligence for clubs, bars and lounges.",
+        start_url: "/",
+        scope: "/",
+        display: "standalone",
+        background_color: "#0b0c0e",
+        theme_color: "#0b0c0e",
+        icons: [
+          { src: "/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
+          { src: "/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
+          { src: "/icon-maskable-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
+        ],
+      },
       workbox: {
         globPatterns: ["**/*.{js,css,woff2,png,svg,ico,jpg,webp}"],
         globIgnores: ["**/og-image.jpg"],
